@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * Sets up the DB for the field visibility settings of the content editor form.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function field_visibility_enable() {
+  db_update('system')
+    ->fields(array('weight' => 200))
+    ->condition('name', 'field_visibility', ' =')
+    ->execute();
+}
+
+/**
+ * Updates from table storage to variable.
+ *
+ * Converts data in the existing database to an array which is now stored
+ * in variables per content type. When final update complete, drops the table.
+ */
+function field_visibility_update_7100() {
+  $export_array = array();
+  $result = db_select('field_visibility_field_visibility', 'c')
+    ->fields('c')
+    ->execute();
+  foreach ($result as $item) {
+    $type = $item->type;
+    $field_name = $item->field_name;
+    $role = $item->role;
+    $visibility = $item->visibility;
+    $export_array[$type][$field_name][$role] = $visibility;
+  }
+  foreach ($export_array as $key => $value) {
+    variable_set('field_visibility_node_' . $key, $value);
+  }
+  db_drop_table('field_visibility_field_visibility');
+}
+
+/**
+ * Converts rid to role name in the existing variables.
+ */
+function field_visibility_update_7101() {
+  $result = db_select('variable', 'v')
+    ->fields('v')
+    ->condition('name', 'field_visibility_node_%', 'LIKE')
+    ->execute();
+  foreach ($result as $item) {
+    $var_name = $item->name;
+    $value = variable_get($var_name);
+    $newval = array();
+    foreach ($value as $field => $role_vis) {
+      $new_role_vis = array();
+      foreach ($role_vis as $rid => $vis) {
+        $roleobj = user_role_load($rid);
+        $new_role_vis[$roleobj->name] = $vis;
+      }
+      $newval[$field] = $new_role_vis;
+    }
+    variable_set($var_name, $newval);
+  }
+}

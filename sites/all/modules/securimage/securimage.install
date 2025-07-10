@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * The install file for Securimage.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function securimage_install() {
+  // The securimage_cache database table is created by the library, and is not
+  // defined in hook_schema(), so it must be created here.
+  $securimage = _securimage_variable_merge();
+  // We can't call createDatabaseTables() directly, so turn the table check
+  // back on and do something that will cause creation.
+  $securimage->skip_table_check = FALSE;
+  // Annoyingly, we have to pass the database connection settings in the
+  // $options to checkByCaptchaId(), so copy them from $securimage.
+  $options = array();
+  $names = array(
+    'use_database',
+    'database_driver',
+    'database_host',
+    'database_user',
+    'database_pass',
+    'database_name',
+    'database_table',
+  );
+  foreach ($names as $name) {
+    $options[$name] = $securimage->$name;
+ }
+  $securimage->checkByCaptchaId('foo','bar', $options);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function securimage_uninstall() {
+  // The securimage_cache database table is created by the library, and is not
+  // defined in hook_schema(), so it must be deleted here.
+  db_drop_table('securimage_cache');
+}
+
+/**
+ * Create the securimage_cache table for the first time.
+ */
+function securimage_update_7000 () {
+  securimage_install();
+}

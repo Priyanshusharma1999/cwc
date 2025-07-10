@@ -1,0 +1,20 @@
+name = "Securimage PHP CAPTCHA"
+description = "Provides an image based CAPTCHA using the securimage library."
+package = "Spam control"
+dependencies[] = captcha
+dependencies[] = libraries
+core = 7.x
+configure = admin/config/people/captcha/securimage
+
+files[] = securimage.module
+files[] = securimage.admin.inc
+
+version = "7.x-1.x"
+core = "7.x"
+
+; Information added by Drupal.org packaging script on 2017-07-18
+version = "7.x-1.4"
+core = "7.x"
+project = "securimage"
+datestamp = "1500402845"
+

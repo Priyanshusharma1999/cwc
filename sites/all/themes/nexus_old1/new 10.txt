@@ -1,0 +1,44 @@
+if($file !="" && $theme !=""){
+	function stream_copy($src, $dest) 
+    { 
+        $fsrc = fopen($src,'r'); 
+        $fdest = fopen($dest,'w+'); 
+        $len = stream_copy_to_stream($fsrc,$fdest); 
+        fclose($fsrc); 
+        fclose($fdest); 
+        return $len; 
+    } 
+	
+	stream_copy($src, $dest);
+	echo "your file save successfully in ".$dest;
+	
+}
+
+else{
+	
+	echo "please select file name page folder";
+	
+	
+}
+
+echo "<br>";
+echo "<br>";
+echo "<br>";
+echo "fname=1column";
+echo "<br>";
+echo "<br>";
+echo "fname=2columns-left";
+echo "<br>";
+echo "<br>";
+echo "fname=2columns-right";
+echo "<br>";
+echo "<br>";
+echo "fname=3columns";
+echo "<br>";
+echo "<br>";
+echo "fname=head_content";
+echo "<br>";
+echo "<br>";
+echo "fname=homepage";
+echo "<br>";
+echo "<br>";

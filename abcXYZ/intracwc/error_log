@@ -1,0 +1,5 @@
+[20-Sep-2018 14:29:02 UTC] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/moptrainfo/public_html/katiyarprint.com/intracwc-audit/application/models/Admin_model.php on line 307
+[20-Sep-2018 14:29:52 UTC] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/moptrainfo/public_html/katiyarprint.com/intracwc-audit/application/models/Admin_model.php on line 307
+[20-Sep-2018 14:29:59 UTC] PHP Fatal error:  Call to undefined function base_url() in /home/moptrainfo/public_html/katiyarprint.com/intracwc-audit/application/views/errors/html/error_404.php on line 34
+[20-Sep-2018 14:30:44 UTC] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/moptrainfo/public_html/katiyarprint.com/intracwc-audit/application/models/Admin_model.php on line 307
+[20-Sep-2018 14:30:48 UTC] PHP Parse error:  syntax error, unexpected '=>' (T_DOUBLE_ARROW) in /home/moptrainfo/public_html/katiyarprint.com/intracwc-audit/application/models/Admin_model.php on line 307

@@ -1,0 +1,35 @@
+USE [JobBasketTest]
+GO
+
+/****** Object:  Table [dbo].[tbl_Images]    Script Date: 09-05-2018 17:49:05 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+SET ANSI_PADDING ON
+GO
+
+CREATE TABLE [dbo].[tbl_Images](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Email] [nvarchar](max) NULL,
+	[Name] [nvarchar](max) NULL,
+	[Size] [int] NULL,
+	[ImageData] [varbinary](max) NULL,
+	[Exten] [varchar](10) NULL,
+	[Applied_Post] [varchar](250) NULL,
+	[prefered_Region] [varchar](300) NULL,
+	[CircleOffice] [varchar](350) NULL,
+ CONSTRAINT [PK_tbl_Images] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+

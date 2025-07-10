@@ -1,0 +1,52 @@
+USE [JobBasketTest]
+GO
+
+/****** Object:  Table [dbo].[JobOffer]    Script Date: 09-05-2018 17:48:19 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+SET ANSI_PADDING ON
+GO
+
+CREATE TABLE [dbo].[JobOffer](
+	[Id] [int] NOT NULL,
+	[RegionalOffice] [nvarchar](max) NULL,
+	[Circle_Office] [nvarchar](max) NULL,
+	[Skilled Work Assistant] [nvarchar](10) NULL,
+	[Machine Operator Grade-II] [nvarchar](10) NULL,
+	[OutBoard Engine Driver] [nvarchar](10) NULL,
+	[Mechanic Grade-II] [nvarchar](10) NULL,
+	[Carpenter Grade-II ] [nvarchar](10) NULL,
+	[Electrician Grade-II ] [nvarchar](10) NULL,
+	[DrillOperator Grade-II ] [nvarchar](10) NULL,
+	[Motor Vehicle Driver OrdinaryGrade] [nvarchar](10) NULL,
+	[Other] [nvarchar](10) NULL,
+	[SkilledWorkAssistantLD] [nvarchar](50) NULL,
+	[MachineOperatorGrade-IILD] [varchar](100) NULL,
+	[OutBoardEngineDriverLD] [varchar](100) NULL,
+	[MechanicGrade-IILD] [varchar](100) NULL,
+	[CarpenterGrade-IILD] [varchar](100) NULL,
+	[ElectricianGrade-IILD] [varchar](100) NULL,
+	[DrillOperatorGrade-IILD] [varchar](100) NULL,
+	[MotorVehicleDriverOrdinaryGradeLD] [varchar](100) NULL,
+	[OtherLD] [varchar](100) NULL,
+	[SkilledWorkAssistantSD] [nvarchar](50) NULL,
+	[MachineOperatorGrade-IISD] [varchar](100) NULL,
+	[OutBoardEngineDriverSD] [varchar](100) NULL,
+	[MechanicGrade-IISD] [varchar](100) NULL,
+	[CarpenterGrade-IISD] [varchar](100) NULL,
+	[ElectricianGrade-IISD] [varchar](100) NULL,
+	[DrillOperatorGrade-IISD] [varchar](100) NULL,
+	[MotorVehicleDriverOrdinaryGradeSD] [varchar](100) NULL,
+	[OtherSD] [varchar](100) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+

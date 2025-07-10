@@ -1,0 +1,301 @@
+<?php
+
+/**
+ * @file
+ * Implements image CAPTCHA for use with the CAPTCHA module
+ */
+
+define('SECURIMAGE_SOLUTION_UNSET', '.');
+/**
+ * Implements hook_help().
+ */
+function securimage_help($path, $arg) {
+  switch ($path) {
+    case 'admin/config/people/captcha/securimage':
+      $output = '<p>' . t('CAPTCHA is a popular challenge where a random textual code is obfuscated in an image or audio clip. This module uses the Securimage library.') . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function securimage_menu() {
+  $items = array();
+  // add an administration tab for securimage
+  $items['admin/config/people/captcha/securimage'] = array(
+    'title' => 'Securimage CAPTCHA',
+    'file' => 'securimage.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('securimage_settings_form'),
+    'access arguments' => array('administer CAPTCHA settings'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  // Menu path for generating font example.
+  $items['admin/config/people/captcha/securimage/font_preview'] = array(
+    'title' => 'Font example',
+    'file' => 'securimage.admin.inc',
+    'page callback' => 'securimage_font_preview',
+    'access arguments' => array('administer CAPTCHA settings'),
+    'type' => MENU_CALLBACK,
+  );
+  // callback for generating an image
+  $items['securimage'] = array(
+    'page callback' => 'securimage_image',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  // callback for generating an audio file
+  $items['securimage-audio'] = array(
+    'page callback' => 'securimage_audio',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_captcha().
+ */
+function securimage_captcha($op, $captcha_type = '', $captcha_sid = NULL) {
+  switch ($op) {
+    case 'list':
+      return array('Securimage');
+      break;
+
+    case 'generate':
+      if ($captcha_type == 'Securimage') {
+        // In maintenance mode, the image CAPTCHA does not work because the request
+        // for the image itself won't succeed (only ?q=user is permitted for
+        // unauthenticated users). We fall back to the Math CAPTCHA in that case.
+        global $user;
+        if (variable_get('maintenance_mode', 0) && $user->uid == 0) {
+          return captcha_captcha('generate', 'Math');
+        }
+
+        // Build the result to return. Start with a dummy solution; the actual
+        // solution will be generated later on.
+        $result = array('solution' => SECURIMAGE_SOLUTION_UNSET);
+
+        // Generate image source URL (add timestamp to avoid problems with
+        // client side caching: subsequent images of the same CAPTCHA session
+        // have the same URL, but should display a different code).
+        $options = array(
+          'query' => array(
+            'sid' => $captcha_sid,
+            'ts' => REQUEST_TIME,
+          ),
+        );
+        $img_src = check_url(url('securimage', $options));
+        $vars = _securimage_variable_get();
+        $securimage = _securimage_variable_merge();
+        $result['form']['wrapper'] = array(
+          '#prefix' => '<div class="captcha-wrapper">',
+          '#suffix' => '</div>',
+          '#weight' => -1,
+        );
+        $img_markup = $securimage::getCaptchaHtml(array(
+          'show_image_url' => $img_src,
+          'show_text_input' => FALSE,
+          'audio_play_url' => check_url(url('securimage-audio', $options)),
+        ));
+        // Add a label and change the Play image to a form input to improve
+        // accessibility.
+        $img_markup = str_replace('<img class="captcha_play_image"', '<span class="visually_hidden" >' . t('Play validation audio') . '</span><img  id="captcha_play_image" class="captcha_play_image"', $img_markup );
+        // Add a label and change the Reload image to a form input to improve
+        // accessibility.
+        $img_markup = preg_replace('{<img (height="[^>]+?)onclick="this\.blur\(\)"(.*?>)}', '<span class="visually_hidden" >' . t('Refresh validation image') . '</span><img id="captcha_reload_image" $1$2', $img_markup);
+        // Remove blur() from Javascript and use a method to find the image to
+        // refresh that does not rely on the ID.
+        $img_markup = preg_replace('{onclick="if \(typeof window.*?"}', 'onclick="if (typeof window.captcha_image_audioObj !== \'undefined\') captcha_image_audioObj.refresh(); jQuery(this).closest(\'form\').find(\'.captcha-wrapper img:first\')[0].src = \'' . $img_src . '&new&\' + Math.random(); return false"', $img_markup );
+        $result['form']['wrapper']['captcha_image'] = array(
+          '#type' => 'markup',
+          '#markup' => $img_markup,
+        );
+        $result['form']['captcha_response'] = array(
+          '#type' => 'textfield',
+          '#title' => t('What text is in the image?'),
+          '#description' => $vars['_module']['textfield_prompt'],
+          '#required' => TRUE,
+          '#size' => 15,
+        );
+
+        $result['captcha_validate'] = 'captcha_validate_case_insensitive_equality';
+
+        return $result;
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function securimage_libraries_info() {
+  $libraries['securimage'] = array(
+    'name' => 'Securimage',
+    'vendor url' => 'http://www.phpcaptcha.org/',
+    'download url' => 'http://www.phpcaptcha.org/download/',
+    'version arguments' => array(
+      'file' => 'README.txt',
+      'pattern' => '/((?:\d+\.?){2,3})/',
+      'lines' => 10,
+    ),
+    'files' => array(
+      'php' => array(
+        'securimage.php',
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Menu callback function that generates the CAPTCHA image.
+ */
+function securimage_image() {
+  _securimage_generate('show');
+}
+
+/**
+ * Menu callback function that generates the CAPTCHA as audio.
+ */
+function securimage_audio() {
+  _securimage_generate('outputAudioFile');
+}
+
+function _securimage_generate($func) {
+  if ($old = _securimage_get_from_db()) {
+    // If output buffering is on: discard current content and disable further buffering
+    if (ob_get_level()) {
+      ob_end_clean();
+    }
+
+    // Set 'no_exit' to prevent the Securimage library from exit()ing.
+    $vars = array('no_exit' => TRUE);
+    if ($old->solution != SECURIMAGE_SOLUTION_UNSET && !isset($_GET['new'])) {
+      $vars['display_value'] = $vars['code_display'] = $old->solution;
+      $vars['code'] = drupal_strtolower($old->solution);
+      // This hack is needed to get securimage to actually use display_value.
+      $vars['captchaId'] = 'internal';
+    }
+    $securimage = _securimage_variable_merge($vars);
+    // Generate the image or audio.
+    if ($func == 'outputAudioFile' && _securimage_variable_get_all()['_module']['use_audio'] && !empty(Securimage::$lame_binary_path) && is_executable(Securimage::$lame_binary_path)) {
+      $securimage->outputAudioFile('mp3');
+    }
+    else {
+      $securimage->$func();
+    }
+    // Update the value stored in the database.
+    if ($old->solution == SECURIMAGE_SOLUTION_UNSET || isset($_GET['new'])) {
+      $code = $securimage->getCode(TRUE, TRUE);
+      db_update('captcha_sessions')
+        ->condition('csid', $old->csid)
+        ->fields(array('status' => CAPTCHA_STATUS_UNSOLVED, 'solution' => $code['code_display']))
+        ->execute();
+    }
+  }
+  exit();
+}
+
+function _securimage_variable_get_all() {
+  // Override some Securimage defaults to improve efficiency. Most of these can
+  // be reconfigured by the user in the settings page.
+  $defaults = array(
+    // This is the same as the Securimage default, without 'l'.
+    'charset' => 'ABCDEFGHKLMNPRSTUVWYZabcdefghkmnprstuvwyz23456789',
+    'code_length' => 4,
+    // These are internal to this module, not used directly by Securimage.
+    '_module' => array(
+      'use_audio' => TRUE,
+      'textfield_prompt' => t('Enter the characters shown in the image or use the speaker icon to get an audio version.'),
+    ),
+  );
+  return variable_get('securimage', $defaults);
+}
+
+function _securimage_variable_get($which = NULL) {
+  static $out_vars;
+
+  if (is_null($out_vars)) {
+    libraries_load('securimage');
+    $securimage = new Securimage();
+    $curr_vars = _securimage_variable_get_all();
+    $out_vars = array('_module' => $curr_vars['_module']);
+    foreach (array_keys((array) $securimage) as $key) {
+      if (preg_match('/^\w+$/', $key)) {
+        if (isset($curr_vars[$key])) {
+          $out_vars[$key] = $curr_vars[$key];
+        }
+        else if ($securimage->$key instanceof Securimage_Color) {
+          $out_vars[$key] = sprintf('#%x%x%x', $securimage->$key->r, $securimage->$key->g, $securimage->$key->b);
+        }
+        else {
+          $out_vars[$key] = $securimage->$key;
+        }
+      }
+    }
+    // lame_binary_path is a static, so it can't be accessed like the others.
+    if (isset($curr_vars['lame_binary_path'])) {
+      $out_vars['lame_binary_path'] = $curr_vars['lame_binary_path'];
+    }
+    else {
+      $out_vars['lame_binary_path'] = Securimage::$lame_binary_path;
+    }
+  }
+  if (empty($which)) {
+    return $out_vars;
+  }
+  return isset($out_vars[$which]) ? $out_vars[$which] : NULL;
+}
+
+function _securimage_variable_merge($vars = array()) {
+  libraries_load('securimage');
+  $securimage = new Securimage($vars);
+  // Tell Securimage to use a MySQL database to store data internally.
+  $db_options = Database::getConnection()->getConnectionOptions();
+  $si_options = _securimage_variable_get_all() + array(
+    'use_database' => TRUE,
+    'database_driver' => $db_options['driver'],
+    'database_host' => $db_options['host'],
+    'database_user' => $db_options['username'],
+    'database_pass' => $db_options['password'],
+    'database_name' => $db_options['database'],
+    'database_table' => 'securimage_cache',
+    // The database is created once during install, so there's no need to check
+    // during every page load.
+    'skip_table_check' => TRUE,
+  );
+  foreach ($si_options as $key => $val) {
+    if ($key != '_module' && isset($securimage->$key)) {
+      if ($securimage->$key instanceof Securimage_Color) {
+        try {
+          $securimage->$key = new Securimage_Color($val);
+        }
+        catch (Exception $e) {
+          // Leave default.
+        }
+      }
+      else if ($key == 'lame_binary_path') {
+        // lame_binary_path is a static, so it can't be set like the others.
+        Securimage::$lame_binary_path = $val;
+      }
+      else {
+        $securimage->$key = $val;
+      }
+    }
+  }
+
+  return $securimage;
+}
+
+function _securimage_get_from_db() {
+  if (empty($_GET['sid'])) {
+    return FALSE;
+  }
+
+  // If there is an entry for this sid in the database, return it.
+  return db_query('SELECT csid, solution FROM {captcha_sessions} WHERE csid = :csid', array(':csid' => $_GET['sid']))->fetchObject();
+}

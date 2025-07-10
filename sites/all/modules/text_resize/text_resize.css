@@ -1,0 +1,53 @@
+a#text_resize_increase {
+
+  display: block;
+  float: left;
+  width: 22px;
+
+margin: 0px 0 0px 3px;
+outline: none;
+cursor: pointer;
+
+
+}
+a#text_resize_reset {
+display: block;
+  float: left;
+  width: 22px;
+
+margin: 0px 0 0px 3px;
+outline: none;
+cursor: pointer;
+
+
+	
+}
+a#text_resize_decrease {
+
+  display: block;
+  float: left;
+  width: 22px;
+margin: 0px 0 0px 3px;
+outline: none;
+cursor: pointer;
+
+
+}
+#text_resize_clear {
+  clear: both;
+}
+.views-field-field-copyright-text p a{color:#fff}
+
+.region-textsize a{color:#000;}
+.region-skiptomain a {background: #02253c; color: #fff !important;}
+.region-textsize a {
+   
+    color: #fff !important;
+}
+ul.language-switcher-locale-url li a {
+    color: #fff;
+    
+}
+.block-styleswitcher ul li:nth-child(2) {
+    background: #fff;
+}

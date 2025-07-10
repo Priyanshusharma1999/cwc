@@ -1,0 +1,14 @@
+name = ScrollText
+description = "This module used for scrolling text from node title."
+;package = "other"
+version = "7.x-1.0-alpha4"
+core = 7.x
+project = "scrolltext"
+configure = admin/config/content/scrolltext
+files[] = scrolltext.admin.inc
+; Information added by drupal.org packaging script on 2013-02-14
+version = "7.x-1.0-alpha4"
+core = "7.x"
+project = "scrolltext"
+datestamp = "1360813622"
+

@@ -1,0 +1,26 @@
+<? include('../tcpdf/tcpdf.php');
+include('../link.php');
+
+echo bookbypageid($_GET['userid'],get);
+
+	
+?>
+
+echo "SELECT
+					ogb.bookdataid, ogb.section, ogb.bookid, ogb.userid, ogb.type, ogb.pagestatus, ogb.childid,
+					ogs.sectionid, ogs.sectionname
+				FROM
+					og_bookdata as ogb,
+					og_section as ogs
+				WHERE
+					ogb.section 	= 	ogs.sectionid
+				AND
+					ogb.bookid		=	'".$_GET['bookid']."'
+				AND
+					ogb.userid		=	'".$_GET['userid']."'
+				AND
+					ogb.childid		=	'".$_GET['childid']."'
+				AND
+					ogb.type 		=	'section'
+				AND
+					ogb.pagestatus	=	'publish'";

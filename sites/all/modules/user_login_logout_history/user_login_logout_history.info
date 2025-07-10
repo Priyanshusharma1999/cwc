@@ -1,0 +1,13 @@
+name = User Login Logout History
+description = This module tracks user login logout history.
+package = Other
+core = 7.x
+version = 7.x-1.0
+dependencies[] = views
+
+
+; Information added by Drupal.org packaging script on 2018-08-21
+version = "7.x-1.2"
+core = "7.x"
+project = "user_login_logout_history"
+datestamp = "1534850886"

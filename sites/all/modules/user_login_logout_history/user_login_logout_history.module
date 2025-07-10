@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * Implementation of hook_user_login()
+ */
+function user_login_logout_history_user_login(&$edit, $account) {
+  $db_q = db_select('user_login_logout_history', 'n');  
+  $db_q->fields('n', array('id'));
+  $db_q->condition('n.uid', $account->uid, '=');
+  $unparsed = $db_q->execute();
+  $result = $unparsed->fetchAll();
+  $count = $unparsed->rowCount();
+  if($count < 1){
+ 
+   $nid = db_insert('user_login_logout_history') // Table name no longer needs {}
+->fields(array(
+  'uid' => $account->uid,
+  'login_timestamp' => REQUEST_TIME,
+ 
+))
+->execute();
+  }else{
+      
+ $num_updated = db_update('user_login_logout_history') // Table name no longer needs {}
+  ->fields(array(
+    
+    'login_timestamp' => REQUEST_TIME,
+    'logout_timestamp' => '0',  
+  ))
+  ->condition('id', $result[0]->id, '=')
+  ->execute(); 
+  }
+}
+
+/**
+ * Implementation of hook_user_logout()
+ */
+function user_login_logout_history_user_logout($account) { 
+ $db_q = db_select('user_login_logout_history', 'n');  
+  $db_q->fields('n', array('id'));
+  $db_q->condition('n.uid', $account->uid, '=');
+  $unparsed = $db_q->execute();
+  $result = $unparsed->fetchAll();
+  $count = $unparsed->rowCount();
+  if($count > 0){
+     $num_updated = db_update('user_login_logout_history') // Table name no longer needs {}
+  ->fields(array(
+    
+    'logout_timestamp' => REQUEST_TIME,
+  ))
+  ->condition('id', $result[0]->id, '=')
+  ->execute();  
+  }
+  
+}
+
+ /**
+ * Implements hook_views_api()
+ */
+  function user_login_logout_history_views_api(){
+  return array('api' => '3.0',
+    'path' => drupal_get_path('module', 'user_login_logout_history'). '/views',
+    );
+}
+
+/*
+ * Implements hook_views_pre_render(&$view)
+ */
+
+function user_login_logout_history_views_pre_render(&$view){
+    if($view->name == 'user_login_logout_history'){
+        foreach($view->result as $key=>$value){
+           // print_r($view->result);
+           $view->result[$key]->user_login_logout_history_login_timestamp = date("F d, Y - h:ia", $value->user_login_logout_history_login_timestamp);
+           if($view->result[$key]->user_login_logout_history_logout_timestamp != '0'){
+           $view->result[$key]->user_login_logout_history_logout_timestamp = date("F d, Y - h:ia", $value->user_login_logout_history_logout_timestamp);
+           }else{
+           $view->result[$key]->user_login_logout_history_logout_timestamp = 'Still Logged In';
+           }
+        }
+    }
+/*   if($view->name == 'popular_teams_content_creators'){
+    $add_new_link = l(t('Add New'), 'node/add/popular-teams');
+    $view->attachment_before = $add_new_link;
+   } */
+}
+
+
+function user_login_logout_history_module_implements_alter(&$implementations, $hook) {
+   // print_r($implementations); die;
+  if ($hook == 'user_login') {
+      //print_r($implementations); die;
+      // It is to ensure that hook_mail_alter of this module is called
+      // after all other hooks
+      
+      unset($implementations['user_login_logout_history']);
+      
+      
+      $implementations = array("user_login_logout_history" => "user_login_logout_history") + $implementations;
+      
+  }
+}

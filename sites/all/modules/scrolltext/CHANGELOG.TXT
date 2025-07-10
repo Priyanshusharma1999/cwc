@@ -1,0 +1,5 @@
+7.x-1.0-alpha1: First version of ScrollText for Drupal 7
+7.x-1.0-alpha2: Stop/Start on Mouse Out and Mouse Over
+7.x-1.0-alpha3: Support Views as Scrolltext source
+7.x-1.0-alpha4: Remove scrolltext_format, use CSS instead
+                Link text to content

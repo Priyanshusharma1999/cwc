@@ -1,0 +1,581 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Circle_circular extends CI_Controller {
+
+	// Initialize Constructor Here
+	function __construct()
+	{
+			parent::__construct();
+			$this->load->model('Base_model');
+			if(empty($this->session->userdata('auser_id')))
+         {
+         	$base_url = base_url().'Frontend/adminnew';
+             redirect($base_url);
+         } 
+
+         if($this->session->userdata('auser_type')!= 3)
+         {
+         
+         	 $base_url = base_url().'Frontend/adminnew';
+             redirect($base_url);
+         }	
+	}
+
+	/**
+	 * Index Page for this controller.
+	 */
+	public function index()
+	{
+		$user_id = $this->session->userdata('auser_id');
+		$circle_user_data = $this->Base_model->get_record_by_id('tbl_admin', array('id' => $user_id));
+		$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1','circle_id'=>$circle_user_data->Circle));
+		$data['all_circle']    = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+		$this->load->view('circle/header');
+		//$this->load->view('circle/topmenu');
+		$this->load->view('circle/sidebar');
+		$this->load->view('circle/jobs/circularlist',$data);
+		$this->load->view('circle/footer');
+
+	}//ends function
+
+	
+	/***********function for add circular*******/
+
+	public function add_circular()
+	{
+
+		if(isset($_REQUEST['submit'])) 
+		{ 
+			
+			$refrence_no  		= xss_clean($this->input->post('refrence_no'));
+			$circular_title  	= xss_clean($this->input->post('circular_title'));
+			$circle_name  		= xss_clean($this->input->post('circle_name'));
+			$job_name= xss_clean($this->input->post('circular_job_name'));
+	
+			$this->form_validation->set_rules('refrence_no','refrence no','trim|required');
+			$this->form_validation->set_rules('circular_title','circular title','trim|required');
+			$this->form_validation->set_rules('circle_name','circle name','trim|required');
+			$this->form_validation->set_rules('circular_job_name','job name','trim|required');
+
+
+
+			if($this->form_validation->run() === false) 
+				{
+						
+					$data['insertData'] = array(
+						'refrence_no' 		=> xss_clean($this->input->post('refrence_no')),
+						'circular_title'	=> xss_clean($this->input->post('circular_title')),
+						'circle_name' 		=> xss_clean($this->input->post('circle_name')),
+						'circular_job_name' 		=> xss_clean($this->input->post('circular_job_name')),
+					);
+
+					$data['all_circle']  = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+					$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+					$this->load->view('circle/header');
+					//$this->load->view('circle/topmenu');
+					$this->load->view('circle/sidebar');
+					$this->load->view('circle/jobs/addcirculars',$data);
+					$this->load->view('circle/footer');
+
+				}//ends if
+
+				else
+				{
+					date_default_timezone_set('Asia/Calcutta'); 
+					$created_date =  date("Y-m-d H:i:s");
+
+					/***********Pdf upload*********	**/
+						if($_FILES['circular_pdf']['name'])
+                {
+                  $configg = array(
+                             'upload_path' => "./uploads/circular/",
+                             'allowed_types' => "pdf",
+                             'overwrite' => TRUE,
+                             'max_size' => "1024", 
+                             );              
+                   $this->load->library('upload', $configg);
+                   $this->upload->initialize($configg);
+                   $pdf_namee=$_FILES['circular_pdf']['name'];
+                   $pic['item_image']= $pdf_namee;
+                   $this->load->library('upload',$configg);
+               	   $this->upload->initialize($configg);
+                   if($this->upload->do_upload('circular_pdf'))
+                  {  
+                     $file_data = $this->upload->data();  
+                     $pdf_namee = $file_data['orig_name'];
+                     $file_path ='uploads/circular'.$pdf_namee;
+                  }
+
+                  else
+                  {
+                    $error=$this->upload->display_errors();   
+                  }
+                }
+					/*******Ends pdf upload code*******/ 
+
+					/*****check Circular********/
+
+						$checked_job = $this->Base_model->check_existent('tbl_circular', array('refrence_no' => $refrence_no,'circular_title' => $circular_title,'circle_id' => $circle_name,'job_id'=>$job_name));
+
+					/*****ends check Circular*****/
+
+					if($checked_job=='1')
+					{
+						$msg = "Circular already exits, Please enter new one";
+						$this->session->set_flashdata('flashError_circular', $msg);
+						$data['all_circular'] = '';
+						$data['all_circle']  = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+						$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+						$this->load->view('circle/header');
+						//$this->load->view('circle/topmenu');
+						$this->load->view('circle/sidebar');
+						$this->load->view('circle/jobs/addcirculars',$data);
+						$this->load->view('circle/footer');
+					}
+
+					else
+					{
+						$pdf_name 	  	= str_replace(' ','_', $pdf_namee);
+							
+							$insert_data = array(
+													'refrence_no' 		=> $refrence_no,
+													'circular_title' 	=> $circular_title,
+													'circle_id' 		=> $circle_name,
+													'file'				=> $pdf_name,
+													'job_id'			=> $job_name,
+													'created_date' 		=> $created_date,
+													'updated_date' 		=> $created_date
+												);
+						$insertid = $this->Base_model->insert_one_row('tbl_circular', $insert_data);
+
+						if($insertid)
+						{
+							$msg = "Circular added successfully.";
+							$this->session->set_flashdata('flashSuccess_circular',$msg);
+							$data['all_circle']  = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+							$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+							$this->load->view('circle/header');
+							//$this->load->view('circle/topmenu');
+							$this->load->view('circle/sidebar');
+							$this->load->view('circle/jobs/addcirculars',$data);
+							$this->load->view('circle/footer');
+						}
+
+						else
+						{
+							$msg = "Fail to add circular.";
+							$this->session->set_flashdata('flashError_circular', $msg);
+							$data['all_circle']  = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+							$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+							$this->load->view('circle/header');
+							//$this->load->view('circle/topmenu');
+							$this->load->view('circle/sidebar');
+							$this->load->view('circle/jobs/addcirculars',$data);
+							$this->load->view('circle/footer');
+						}
+					}//ends else		
+				}//ends main else
+
+		}//ends if
+
+		else
+		{
+			$data['all_circular'] = '';
+			$data['all_circle']  = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+			$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+			$this->load->view('circle/header');
+			//$this->load->view('circle/topmenu');
+			$this->load->view('circle/sidebar');
+			$this->load->view('circle/jobs/addcirculars',$data);
+			$this->load->view('circle/footer');
+
+		}//ends else	
+
+	}// ends function
+
+	/********function for Edit Circular******/
+
+	public function edit_circular()
+	{
+		$uri = $this->uri->segment('3');
+		if(isset($_REQUEST['submit'])) 
+		{
+
+			$uri = $this->uri->segment('3');
+			$refrence_no  		= xss_clean($this->input->post('refrence_no'));
+			$circular_title  	= xss_clean($this->input->post('circular_title'));
+			$circle_name  		= xss_clean($this->input->post('circle_name'));
+			$job_name= xss_clean($this->input->post('circular_job_name'));
+	
+			$this->form_validation->set_rules('refrence_no','refrence no','trim|required');
+			$this->form_validation->set_rules('circular_title','circular title','trim|required');
+			$this->form_validation->set_rules('circle_name','circle name','trim|required');
+
+			if($this->form_validation->run() === false) 
+				{
+
+					$uri = $this->uri->segment('3');
+					$data['all_circle']  	 = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+					$data['circular_data'] = $this->Base_model->get_record_by_id('tbl_circular', array('id' => $uri));
+					$this->load->view('circle/header');
+					$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+					//$this->load->view('circle/topmenu');
+					$this->load->view('circle/sidebar');
+					$this->load->view('circle/jobs/edit_circular',$data);
+					$this->load->view('circle/footer');
+
+				}//ends if
+
+				else
+				{
+				
+					date_default_timezone_set('Asia/Calcutta'); 
+					$created_date =  date("Y-m-d H:i:s"); 
+
+					/***********Pdf upload*********	**/
+						if($_FILES['circular_pdff']['name'])
+                {
+                  $configg = array(
+                             'upload_path' => "./uploads/circular/",
+                             'allowed_types' => "pdf",
+                             'overwrite' => TRUE,
+                             'max_size' => "1024", 
+                             );              
+                   $this->load->library('upload', $configg);
+                   $this->upload->initialize($configg);
+                   $pdf_namee=$_FILES['circular_pdff']['name'];
+                   $pic['item_image']= $pdf_namee;
+                   $this->load->library('upload',$configg);
+               	   $this->upload->initialize($configg);
+                   if($this->upload->do_upload('circular_pdff'))
+                  {  
+                     $file_data = $this->upload->data();  
+                     $pdf_namee = $file_data['orig_name'];
+                     $file_path ='uploads/circular'.$pdf_namee;
+                  }
+
+                  else
+                  {
+                    $error=$this->upload->display_errors();   
+                  }
+                }
+					/*******Ends pdf upload code*******/ 
+
+					/*****check circular********/
+						if(empty($pdf_namee))
+						{
+							$get_circular_data = $this->Base_model->get_record_by_id('tbl_circular', array('id' => $uri));
+							$pdf_name 	  	= $get_circular_data->file;
+						}
+
+						else
+						{
+							$pdf_name 	  	= str_replace(' ','_', $pdf_namee);
+						}
+						
+						$checked_job = $this->Base_model->check_existent('tbl_circular', array('refrence_no' => $refrence_no,'circular_title' => $circular_title,'circle_id' => $circle_name , 'file' =>$pdf_name,'job_id' =>$job_name ));
+
+
+					/*****ends check circular*****/
+
+					if($checked=='1')
+					{
+						
+						$msg = "Circular updated successfully.";
+						$this->session->set_flashdata('flashSuccess_circular',$msg);
+						$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+						$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+						$this->load->view('circle/header');
+						//$this->load->view('circle/topmenu');
+						$this->load->view('circle/sidebar');
+						$this->load->view('circle/jobs/circularlist',$data);
+						$this->load->view('circle/footer');
+					}
+
+					else
+					{
+							$checked_refrence_no = $this->Base_model->check_existent('tbl_circular', array('refrence_no' => $refrence_no,'circle_id' => $circle_name,'job_id' =>$job_name));
+							$checked_circular_title = $this->Base_model->check_existent('tbl_circular', array('circular_title' => $circular_title,'circle_id' => $circle_name,'job_id' =>$job_name));
+							$get_circular_data = $this->Base_model->get_record_by_id('tbl_circular', array('id' => $uri));
+
+							if($checked_refrence_no=='1')
+							{
+									if($checked_circular_title=='1')
+									{
+										if($refrence_no ==$get_circular_data->refrence_no)
+											{//start refrence if
+													if($circular_title ==$get_circular_data->circular_title)
+														{
+																$update_data = array('refrence_no' 		=> $refrence_no,
+																'circular_title' 	=> $circular_title,
+																'circle_id' 		=> $circle_name,
+																'file'				=> $pdf_name,
+																'job_id' =>$job_name,
+																'updated_date' 		=> $created_date);
+														
+																$updateid = $this->Base_model->update_record_by_id('tbl_circular', $update_data, array('id'=> $uri));
+																$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+																$msg = "Circular updated successfully.";
+																	$this->session->set_flashdata('flashSuccess_circular',$msg);
+																	$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+																	$this->load->view('circle/header');
+																	//$this->load->view('circle/topmenu');
+																	$this->load->view('circle/sidebar');
+																	$this->load->view('circle/jobs/circularlist',$data);
+																	$this->load->view('circle/footer');
+														}
+
+														else
+														{
+																$msg = "Circular Title already exits.";
+																$this->session->set_flashdata('flashError_circular',$msg);
+																$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+																$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+																$this->load->view('circle/header');
+																//$this->load->view('circle/topmenu');
+																$this->load->view('circle/sidebar');
+																$this->load->view('circle/jobs/circularlist',$data);
+																$this->load->view('circle/footer');
+														}
+											}//ends refrence if
+
+											else
+											{
+													$msg = "Refrence no already exits.";
+													$this->session->set_flashdata('flashError_circular',$msg);
+													$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+													$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+													$this->load->view('circle/header');
+													//$this->load->view('circle/topmenu');
+													$this->load->view('circle/sidebar');
+													$this->load->view('circle/jobs/circularlist',$data);
+													$this->load->view('circle/footer');
+											}//ends else ashjdsjdjsd
+											
+									}//ends circurlar title if
+
+									else
+									{
+											if($refrence_no ==$get_circular_data->refrence_no)
+											{
+												$update_data = array('refrence_no' 		=> $refrence_no,
+															'circular_title' 	=> $circular_title,
+															'circle_id' 		=> $circle_name,
+															'file'				=> $pdf_name,
+															'job_id' =>$job_name,
+															'updated_date' 		=> $created_date);
+													
+												$updateid = $this->Base_model->update_record_by_id('tbl_circular', $update_data, array('id'=> $uri));
+												$msg = "Circular updated successfully.";
+													$this->session->set_flashdata('flashSuccess_circular',$msg);
+													$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+													$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+													$this->load->view('circle/header');
+													//$this->load->view('circle/topmenu');
+													$this->load->view('circle/sidebar');
+													$this->load->view('circle/jobs/circularlist',$data);
+													$this->load->view('circle/footer');
+											}
+
+											else
+											{
+													$msg = "Refrence no already exits.";
+													$this->session->set_flashdata('flashError_circular',$msg);
+													$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+													$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+													$this->load->view('circle/header');
+													//$this->load->view('circle/topmenu');
+													$this->load->view('circle/sidebar');
+													$this->load->view('circle/jobs/circularlist',$data);
+													$this->load->view('circle/footer');
+											}//ends refrence else
+									}//ends circurlar title else
+									
+							}//ends if
+
+							else if($checked_refrence_no=='1')
+							{
+									if($refrence_no ==$get_circular_data->refrence_no)
+											{
+												$update_data = array('refrence_no' 		=> $refrence_no,
+															'circular_title' 	=> $circular_title,
+															'circle_id' 		=> $circle_name,
+															'file'				=> $pdf_name,
+															'job_id' =>$job_name,
+															'updated_date' 		=> $created_date);
+													
+												$updateid = $this->Base_model->update_record_by_id('tbl_circular', $update_data, array('id'=> $uri));
+												$msg = "Circular updated successfully.";
+													$this->session->set_flashdata('flashSuccess_circular',$msg);
+													$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+													$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+													$this->load->view('circle/header');
+													//$this->load->view('circle/topmenu');
+													$this->load->view('circle/sidebar');
+													$this->load->view('circle/jobs/circularlist',$data);
+													$this->load->view('circle/footer');
+											}
+
+											else
+											{
+													$msg = "Refrence no already exits.";
+													$this->session->set_flashdata('flashError_circular',$msg);
+													$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+													$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+													$this->load->view('circle/header');
+													//$this->load->view('circle/topmenu');
+													$this->load->view('circle/sidebar');
+													$this->load->view('circle/jobs/circularlist',$data);
+													$this->load->view('circle/footer');
+											}//ends refrence else
+							}// ends else if
+
+							else
+							{
+								$update_data = array('refrence_no' 		=> $refrence_no,
+													'circular_title' 	=> $circular_title,
+													'circle_id' 		=> $circle_name,
+													'file'				=> $pdf_name,
+													'job_id' =>$job_name,
+													'updated_date' 		=> $created_date);
+											
+										$updateid = $this->Base_model->update_record_by_id('tbl_circular', $update_data, array('id'=> $uri));
+
+										if($updateid)
+										{
+											$msg = "Circular updated successfully.";
+											$this->session->set_flashdata('flashSuccess_circular',$msg);
+											$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+											$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+											$this->load->view('circle/header');
+											//$this->load->view('circle/topmenu');
+											$this->load->view('circle/sidebar');
+											$this->load->view('circle/jobs/circularlist',$data);
+											$this->load->view('circle/footer');
+										}
+
+										else
+										{
+											$msg = "Fail to update circular.";
+											$this->session->set_flashdata('flashError_circular', $msg);
+										
+											$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1'));
+											$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+											$this->load->view('circle/header');
+											//$this->load->view('circle/topmenu');
+											$this->load->view('circle/sidebar');
+											$this->load->view('circle/jobs/circularlist',$data);
+											$this->load->view('circle/footer');
+										}
+									}//ends else last
+										
+								
+					}//ends main else
+				}//ends else
+
+		}//ends if
+
+		else
+		{
+
+				$uri = $this->uri->segment('3');
+				$data['all_circle']  	 = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+				$data['circular_data'] = $this->Base_model->get_record_by_id('tbl_circular', array('id' => $uri));
+				$this->load->view('circle/header');
+				$data['all_jobs'] 		= $this->Base_model->get_all_record_by_condition('tbl_jobs', array('status'=>'1'));
+				//$this->load->view('circle/topmenu');
+				$this->load->view('circle/sidebar');
+				$this->load->view('circle/jobs/edit_circular',$data);
+				$this->load->view('circle/footer');
+		}//ends else
+	}//ends function
+
+	/********function for View Circular******/
+
+	public function view_circular()
+	{
+				$uri = $this->uri->segment('3');
+				$data['all_circle']  	 = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+				$data['circular_data'] = $this->Base_model->get_record_by_id('tbl_circular', array('id' => $uri));
+				$this->load->view('circle/header');
+				//$this->load->view('circle/topmenu');
+				$this->load->view('circle/sidebar');
+				$this->load->view('circle/jobs/view_circular',$data);
+				$this->load->view('circle/footer');
+
+	}//ends function
+
+	/********function for Delete Circular******/
+
+	public function delete_circular()
+	{
+				date_default_timezone_set('Asia/Calcutta'); 
+				$created_date =  date("Y-m-d H:i:s"); 
+				$delete_itemId = xss_clean($this->input->post('delete_itemId'));
+				$data['circular_data'] = $circular_data =  $this->Base_model->get_record_by_id('tbl_circular', array('id' => $delete_itemId));
+				$data['all_circle']    = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+				$update_data = array(
+													'circular_title' 	=> $circular_data->circular_title,
+													'status'				=> '0',
+													'delete_status' => '0',
+													'updated_date' 	=> $created_date
+												);
+				$user_id = $this->session->userdata('auser_id');
+				$circle_user_data = $this->Base_model->get_record_by_id('tbl_admin', array('id' => $user_id));
+				$updateid = $this->Base_model->update_record_by_id('tbl_circular', $update_data, array('id'=> $delete_itemId));
+				$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1','circle_id'=>$circle_user_data->Circle));
+				$this->load->view('circle/header');
+				$this->load->view('circle/sidebar');
+				$this->load->view('circle/jobs/circularlist',$data);
+				$this->load->view('circle/footer');
+
+	}
+
+		/*********function for search circular************/
+
+		public function search_circular()
+	{
+			$circular_title = xss_clean($this->input->post('circular_title'));
+			$circle_name = xss_clean($this->input->post('circle_nnname'));
+			$user_id = $this->session->userdata('auser_id');
+			$circle_user_data = $this->Base_model->get_record_by_id('tbl_admin', array('id' => $user_id));
+			
+
+			if(empty($circular_title) && empty($circle_name))
+				{ 
+					$data['all_circulars'] = $this->Base_model->get_all_record_by_condition('tbl_circular', array('status'=>'1','circle_id'=>$circle_user_data->Circle));
+					$data['all_circle']    = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+					$this->load->view('circle/header');
+					$this->load->view('circle/sidebar');
+					$this->load->view('circle/jobs/circularlist',$data);
+					$this->load->view('circle/footer');
+
+				}//ends if
+
+				else
+				{ 
+					$data['all_circulars'] = $this->Base_model->search_circular($circular_title,$circle_name);
+					$data['all_circle']    = $this->Base_model->get_all_record_by_condition('tbl_circle', array('status'=>'1'));
+					$this->load->view('circle/header');
+					$this->load->view('circle/sidebar');
+					$this->load->view('circle/jobs/circularlist',$data);
+					$this->load->view('circle/footer');
+
+				}//ends else
+	}//function ends
+
+	/*******function to gettting all circular circles********/
+public function all_circular_circle()
+	{
+		
+		$job_id = $this->input->post('id');
+		$job_data = $this->Base_model->get_record_by_id('tbl_jobs', array('id' => $job_id));
+		$all_circle =  $this->Base_model->get_all_record_by_condition('tbl_circle', array('id'=>$job_data->circle_id));
+		
+		$all_circles =  json_encode($all_circle);
+		echo  $all_circles;
+	}// ends function
+
+
+}//class ends

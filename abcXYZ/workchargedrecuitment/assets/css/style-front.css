@@ -1,0 +1,683 @@
+/*
+Author       : Dreamguys
+Template Name: Preadmin - Bootstrap Admin Template
+Version      : 1.0
+*/
+
+/*------------------------------------------------------------------
+
+[Table of contents]
+
+1. Common
+2. Table
+3. Helper Class
+4. Bootstrap Classes
+5. Animation
+6. Header
+7. Sidebar
+8. Content
+9. Login
+10. Dashboard
+11. Activity
+12. Select2
+13. Nav tabs
+14. Holidays
+15. Edit Profile
+16. Chat
+17. Focus Label
+18. Leave
+19. Employee
+20. Events
+21. Profile
+22. Notifications
+23. Roles & Permissions
+24. Chat Right Sidebar
+25. Projects
+26. Invoice
+27. Task
+28. Project View
+29. Payslip
+30. Attendance
+31. Ticket
+32. Client Profile
+33. Inbox
+34. Mail View
+35. Pricing
+36. Blog
+37. Blog View
+38. UI Kit
+39. Error
+40. Lock Screen
+41. Countdown
+42. Voice call
+43. Video Call
+44. Incoming call
+45. Widgets
+46. Contacts
+47. Notification settings
+48. Add Product
+49. Product
+50. Product Details
+51. Chat Sidebar
+52. Gallery
+53. Responsive
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[1. Common]
+*/
+
+html {margin:0;padding:0;}
+body{font-family: 'Fira Sans', sans-serif;font-size:14px;color:#333;background-color:#fff;overflow-x: hidden;height:100%;}
+h1, h2, h3, h4, h5, h6{margin-top:0;}
+a:hover,
+a:active,
+a:focus {text-decoration:none;color: #009ce7;  outline: none;}
+.form-control {border-radius: 0;box-shadow: none;height: 40px;}
+.form-control:focus {border-color: #2662df;box-shadow: none;outline: 0 none;}
+a {color: #009ce7;}
+input, button, a {transition: all 0.4s ease; -moz-transition: all 0.4s ease; -o-transition: all 0.4s ease; -ms-transition: all 0.4s ease; -webkit-transition: all 0.4s ease;}
+input, button {outline: none;}
+input[type="file"] {height:auto;}
+input[type=text], input[type=password] {-webkit-appearance: none;-moz-appearance: none;appearance: none;}
+textarea.form-control {resize: vertical;height:100px;}
+.navbar-nav > li {float: left;}
+.input-lg.form-control {border-radius: 0;height: 46px;}
+.input-sm.form-control {height: 30px;border-radius: 0;}
+.form-group {margin-bottom: 20px;}
+.display-block {display: block;}
+.input-group .form-control {height: 34px;}
+.input-group.input-group-lg .form-control {height: 46px;}
+.btn.rounded {box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);}
+
+
+/****************************************************************************************************************/
+
+.footer-wrapper{
+	background: #0f4c9f;
+	padding: 30px 0 0;
+	color:#fff;
+        position:relative;
+}
+
+.footer-top{
+	width: 100%;
+    margin-bottom: 20px;
+    float: left;
+}
+
+.footer-bottom{
+    width: 100%;
+    clear: both;
+    text-align: center;
+    background: #353535;
+    padding: 15px 50px;
+    font-size: 12px;
+   color:#fff;
+}
+
+.footer-wrapper ul{list-style:none;padding:0;text-align:left;}
+
+
+ul.location li {
+    float: left;
+    display: inline-block;
+    margin: 0;
+}
+
+ul.location li:nth-child(2) {
+    float: right;
+    width: 93%;
+    color: #fff;
+    font-size: 0.95em;
+    line-height: 2em;
+    margin: 0;
+}
+
+.footer-wrapper ul li{
+   display: inline-block;
+   color: #FFF;
+   text-decoration: none;
+   padding: 0;
+   text-align: left;
+   margin-top:7px;
+}
+
+.external-link ul li {
+    list-style-type: none;
+    display: inline-block;
+    width: 48%;
+    margin-bottom: 10px;
+}
+
+.footer-wrapper ul li a{color:#fff;}
+
+.menu-block-9 ul.menu li {
+    list-style-type: none;
+    display: inline-block;
+    width: 50%;
+    margin-bottom: 10px;
+}
+
+.section-header-wrapper-top {
+    background:#fff;
+    padding:10px 0;
+}
+
+.section-header-wrapper {
+    background: #0F4C9F;
+    height: 50px;
+}
+
+.header-logo {
+    width: 50%;
+    display: inline-block;
+    text-align: left;
+}
+
+.header-logo-right {
+    width: 49%;
+    display: inline-block;
+    text-align: right;
+}
+
+
+.header-logo img{
+	vertical-align: initial;
+	margin-bottom: 5px;
+}
+
+.header-logo-right img{
+	vertical-align: initial;
+        margin-bottom: 5px;
+}
+
+
+.logimg {
+    padding: 0;
+    margin: 0;
+    width: 20%;
+    float: left;
+}
+
+.logtext {
+    padding: 0;
+    margin: 0;
+    width: 80%;
+    float: left;
+}
+
+h1.logo {
+    font-size: 2.2em !important;
+    color: #2575a7;
+    font-weight: 500;
+    font-family: initial;
+    padding: 20px 0px 0px 0px;
+    margin: 0 !important;
+}
+
+p.logo-text {
+    color: #f7541d !important;
+    font-weight: 600;
+    font-family: initial;
+    letter-spacing: 1px;
+    font-style: italic;
+    font-size: 1.2em;
+    margin: -4px 5px;
+}
+
+.header-nav{
+	width: 70%;
+	display: inline-block;
+	background: none;
+	border: 0;
+	color: #fff;
+	min-height: initial;
+}
+
+ul.links{list-style:none;margin:0;padding:0;}
+
+ul.links li.first {
+    padding-left: 0;
+}
+
+.header-nav ul li {
+    /* border-left: 1px solid #415b98; */
+    color: #fff;
+    float: left;
+    font-size: 14px;
+    text-transform: uppercase;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position:relative;
+}
+.header-nav ul li a {
+    color: #fff!important;
+    display: block;
+    font-size: 15px;
+    text-transform: capitalize;
+    padding: 15px 19px;
+}
+
+
+.header-nav ul li a:hover{
+	background: #f7541d!important;
+       color: #fff!important;
+}
+
+.header-nav ul li a.active{
+	background: #f7541d!important;
+        color: #fff!important;
+}
+
+.header-nav ul li:last-child {
+    /* border-right: 1px solid #415b98; */
+}
+
+.noticetab {
+    background: #fff;
+    border-top: 2px dashed #0f4c9f;
+    border-bottom: 2px dashed #2662df;
+}
+
+.noticelable {
+    background: #0f4c9f;
+    padding: 13px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.noticedata {
+    padding-top: 15px;
+	padding-left:0;
+}
+
+p.fl_left{margin:0;}
+
+.portals{
+	border: 1px solid #1ca6e9;
+    padding: 10px;
+    margin: 30px 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px 0px #777;
+}
+
+.portals h3{
+	background: #1ca6e9;
+    color: #fff;
+    padding: 5px 0;
+    text-align: center;
+    font-size: 18px;
+}
+
+.portals ul{
+	padding:0;
+	list-style:none;
+}
+
+.portals ul li{margin-bottom:10px;}
+
+
+.section-title {
+    text-align: center;
+    margin-bottom: 40px;
+	margin-top:60px;
+}
+
+.section-title h2 {
+    margin: 0 0 35px;
+    padding: 0 0 15px;
+    position: relative;
+    text-transform: uppercase;
+	font-weight:600;
+}
+
+.section-title h2::before {
+    background: #2662df;
+    background: -webkit-linear-gradient(left, #2662df, #2662df);
+    background: -o-linear-gradient(right, #2662df, #2662df);
+    background: -moz-linear-gradient(right, #2662df, #2662df);
+    background: linear-gradient(to right, #2662df, #2662df);
+    content: "";
+    height: 2px;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 100px;
+}
+
+.section-title h2::after {
+    background: #2662df;
+    background: -webkit-linear-gradient(left, #2662df, #2662df);
+    background: -o-linear-gradient(right, #2662df, #2662df);
+    background: -moz-linear-gradient(right, #2662df, #2662df);
+    background: linear-gradient(to right, #2662df, #2662df);
+    content: "";
+    height: 2px;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    right: 0;
+    bottom: -10px;
+    width: 40px;
+}
+
+.download-container{
+	width:100%;
+	border-radius:5px;
+	background:#0f4c9f;
+	padding:20px;
+	margin-bottom:60px;
+}
+
+.download-container ul{list-style:none;padding-left:25px;}
+
+.download-container ul li{margin-bottom:10px;position:relative;}
+
+.download-container ul li a{color: #0f4c9f;font-size:14px;text-decoration:underline;}
+
+.download-container ul li a img{
+	position: absolute;
+    left: -40px;
+    top: 2px;
+}
+
+
+.header-top {
+    background-color: #000;
+    padding: 6px 0 0px 0;
+    border-bottom: 1px solid #4a4747;
+}
+
+.wrap {
+    width: 90%;
+    margin: 0 auto;
+}
+
+.top-menu {
+    padding: 0 0 5px 15px;
+    color: #fff;
+}
+
+/*********************** step form *******************************************************************/
+
+.panel-primary>.panel-heading {
+    color: #fff;
+    background-color: #2662df;
+    border-color: #2662df;
+}
+
+.btn-primary {
+   color: #fff;
+   background-color: #0f4c9f;
+   border-color: #0f4c9f;
+}
+
+.form-container{width:100%;margin:10px 0;}
+
+.stepwizard-step p {
+    margin-top: 10px;
+    color: #666;
+    font-size: 16px;
+    font-weight: 600;
+}
+.stepwizard-row {
+    display: table-row;
+}
+.stepwizard {
+    display: table;
+    width: 100%;
+    position: relative;
+	margin-bottom:30px;
+}
+
+.stepwizard .btn.disabled, .stepwizard .btn[disabled], .stepwizard fieldset[disabled] .btn {
+    opacity:1 !important;
+    color:#bbb;
+}
+.stepwizard-row:before {
+    top: 20px;
+    bottom: 0;
+    position: absolute;
+    content: " ";
+    width: 78%;
+    height: 1px;
+    background-color: #ccc;
+    z-index: 0;
+    left: 12%;
+}
+.stepwizard-step {
+    display: table-cell;
+    text-align: center;
+    position: relative;
+	width:20%;
+}
+.btn-circle {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    padding: 9px 0;
+    font-size: 15px;
+    line-height: 1.428571429;
+    border-radius: 20px;
+    font-weight: 900;
+}
+
+.ed-label{font-size:12px;}
+
+.nopadding{padding:0;}
+
+.padding-5{padding-left:5px;padding-right:5px;}
+
+.row-ed{width:100%;clear:both;}
+
+.ajax-file-upload-container {
+    margin:0!important;
+    width: 50%;
+    float: left;
+}
+
+#fileuploader{
+	width: 50%;
+	margin-bottom:20px;
+}
+
+label{font-size:12px;}
+
+/*****************************************************************************************************/
+
+.account-box {
+    margin: 80px auto;
+    width: 600px;
+    border: 1px solid #e7e7e7;
+    background-color: #fff;
+    box-shadow: 0 6px 15px rgba(36, 37, 38, 0.08);
+}
+
+.account-wrapper {
+    padding: 30px;
+}
+
+.account-box .form-group {
+    margin-bottom: 15px;
+	position:relative;
+}
+
+
+.form-focus .control-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+}
+
+.form-focus .form-control {
+    height: 40px;
+    padding: 8px 12px 6px;
+}
+
+.account-box .account-btn {
+    border-radius: 0;
+    font-size: 20px;
+    padding: 8px 26px;
+    border: 0;
+}
+
+.account-title {
+     font-size: 32px;
+    margin: 0 0 40px 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+ul.sub{
+	position: absolute;
+	width: 200px;
+	left: 0;
+	top: 50px;
+	background: #0f4c9f;
+	padding: 0;
+	list-style: none;
+	display:none;
+}
+
+ul.sub>li{
+	border: 0!important;
+    text-align: left;
+    display: block;
+	width:100%;
+}
+
+ul.sub:>li a:hover{
+	background:#b3d9ff;
+	color:#333;
+}
+
+.header-nav>ul>li:hover ul.sub{display:block;z-index: 9999;}
+
+span.required{
+	font-size: 14px;
+    color: #f00;
+    margin-left: 3px;
+}
+
+.btn-color{
+	background: #0f4c9f;
+	border-color: #0f4c9f;
+	color: #fff;
+	border-radius: 0;
+	position: absolute;
+	right: 5px;
+	top: 30px;
+}
+
+.btn-color:hover{color:#fff;}
+
+.modal-body .account-wrapper {
+    padding: 15px;
+}
+
+.modal-body .account-title {
+    font-size: 25px;
+    margin: 0 0 25px 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+.modal-dialog {
+    width: 600px;
+    margin: 150px auto;
+}
+
+#CaptchaDiv{
+	padding: 10px;
+	margin-top: 15px;
+	width: 100px;
+	text-align: center;
+	font-size: 20px;
+	color: #0f4c9f;
+	background: #b3d9ff;
+	display:inline-block;
+}
+
+.cal-icon {
+    position: relative;
+    width: 100%;
+}
+
+.cal-icon::after {
+    background: transparent url(../img/calander.png) no-repeat scroll 0 0;
+    bottom: 0;
+    content: "";
+    display: block;
+    height: 19px;
+    margin: auto;
+    position: absolute;
+    right: 15px;
+    top: 0;
+    width: 17px;
+}
+
+
+@media (min-width: 1200px){
+.container {
+    width:92%;
+}
+}
+
+
+.zoom{color:#fff;font-size:15px;margin:0 8px;}
+
+.zoom:hover{text-decoration:underline;color:#fff;}
+
+
+.form-group span.error{display:block;min-height:20px;}
+
+.form-group div.error{display:block;min-height:20px;}
+
+.cal-icon::after{
+    background: transparent url(../img/calander.png) no-repeat scroll 0 0;
+    bottom: 0;
+    content: "";
+    display: block;
+    height: 35px!important;
+    margin: auto;
+    position: absolute;
+    right: 15px;
+    top: 0;
+    width: 17px
+}
+
+h3.notice{
+
+    font-size: 15px;
+    background: #f05d27;
+    padding: 8px 10px;
+    color: #fff;
+
+ }    
+
+ .combined-container{
+    float:left;
+    border: 1px solid #ddd;
+    padding: 20px 20px 0;
+    margin-bottom: 20px;
+ }
+
+ .otp-success {
+    
+        color: #3c763d;
+        font-size: 25px;
+        position: absolute;
+        top: 32px;
+        right: 12px;
+ }
+
+ input[type=date]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    display: none;
+}

@@ -1,0 +1,1368 @@
+<?php
+error_reporting(0);
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Pension extends CI_Controller {
+
+	/**
+	 * Index Page for this controller.
+	 *
+	 * Maps to the following URL
+	 * 		http://example.com/index.php/welcome
+	 *	- or -
+	 * 		http://example.com/index.php/welcome/index
+	 *	- or -
+	 * Since this controller is set as the default controller in
+	 * config/routes.php, it's displayed at http://example.com/
+	 *
+	 * So any other public methods not prefixed with an underscore will
+	 * map to /index.php/welcome/<method_name>
+	 * @see https://codeigniter.com/user_guide/general/urls.html
+	 */
+	 
+	 
+	 function __construct()
+	{
+			parent::__construct();
+			$this->load->model('Base_model');
+			
+			$coookie_ci_value = $this->input->cookie('ci_session', TRUE);
+
+			$session_cookie_value = $this->session->userdata('asession_cookie');
+			
+			if(empty($this->session->userdata('applicant_user_id')))
+			 {
+				$base_url = base_url();
+				 redirect($base_url.'Frontend/logout');
+			 } 
+
+			 if($coookie_ci_value != $session_cookie_value )
+			 {
+				$base_url = base_url();
+				 redirect($base_url.'Frontend/logout');
+			 } 
+	}
+	 
+	public function index()
+	{
+		$segment_id = $this->uri->segment('3');
+		$uri = $this->session->userdata('applicant_user_id');
+
+		if($segment_id!=$uri)
+		{
+			$base_url = base_url();
+			redirect($base_url.'Frontend/logout');
+		}
+
+		else
+		{
+			$userdata = $this->Base_model->get_record_by_id('users',array('USERS_ID'=>$this->session->userdata('applicant_user_id')));
+
+			if($userdata->ORGANIZATION_ID != 0){
+	               
+	               $data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0,'ORGANISATION'=>$userdata->ORGANIZATION_ID));
+
+			} else {
+
+	              $data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+			}
+			
+			$this->load->view('admin/header');
+			$this->load->view('admin/sidebar');
+			$this->load->view('admin/pension/pensionlist',$data);
+			$this->load->view('admin/footer');	
+		}//ends else
+		
+	
+	}
+
+	//
+
+	public function encrt()
+	{
+		
+		$adhar_1 	= trim(xss_clean($this->input->post('adhar_1')));
+		$pan_1 	= trim(xss_clean($this->input->post('pan_1')));
+		
+		$res = $this->encrypt_decrypt('encrypt', $adhar_1);
+		$res2 = $this->encrypt_decrypt('encrypt', $pan_1);
+        $str = array('status'=>'success','msg' =>$res,'panmsg' =>$res2,'error' => 0);
+		$all_str =  json_encode($str);
+		echo  $all_str;
+
+	}// ends function
+
+	//bk
+	public  function encrypt_decrypt($action, $string)
+		{
+
+		  $output = false;	 
+		 
+		 
+		  $encrypt_method = "AES-256-CBC";
+          $secret_key = 'gdggrgrgrgrsgsrgt';
+          $secret_iv = 'Annfjhgjg';
+		  
+		  $key = hash('sha256', $secret_key);
+		 
+		  $iv = substr(hash('sha256', $secret_iv), 0, 16);
+		 
+		  if ($action == 'encrypt')
+		  {
+		    $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);
+		    $output = base64_encode($output);
+		  }
+		  else
+		  {
+		    if ($action == 'decrypt')
+		    {
+				$output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+		      //$output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+		    }
+		  }
+		 
+		  return $output;
+		}
+
+	//salt
+
+	public function cryptoJsAesDecrypt($jsonString){
+
+	$passphrase = $this->config->item('salt_keyy');
+    $jsondata = json_decode($jsonString, true);
+    try {
+        $salt = hex2bin($jsondata["s"]);
+        $iv  = hex2bin($jsondata["iv"]);
+    } catch(Exception $e) { return null; }
+    $ct = base64_decode($jsondata["ct"]);
+    $concatedPassphrase = $passphrase.$salt;
+    $md5 = array();
+    $md5[0] = md5($concatedPassphrase, true);
+    $result = $md5[0];
+    for ($i = 1; $i < 3; $i++) {
+        $md5[$i] = md5($md5[$i - 1].$concatedPassphrase, true);
+        $result .= $md5[$i];
+    }
+    $key = substr($result, 0, 32);
+    $data = openssl_decrypt($ct, 'aes-256-cbc', $key, true, $iv);
+
+    return $data;
+    //return json_decode($data, true);
+}//ends salt
+
+
+	
+	
+	public function addpension_form()
+	{
+	   $segment_id = $this->uri->segment('3');
+		$uri = $this->session->userdata('applicant_user_id');
+
+		if($segment_id!=$uri)
+		{
+			$base_url = base_url();
+			redirect($base_url.'Frontend/logout');
+		}
+
+		else
+		{
+			
+			if(isset($_POST['submit'])) 
+		{	
+			//echo "<pre>"; print_r($_REQUEST);exit;
+			
+			$pension_paper_submit_status       = xss_clean($this->input->post('pension_paper_submit'));
+
+			if($pension_paper_submit == 'Yes')
+			{
+				$pstatus = xss_clean($this->input->post('submission_status1'));
+			}
+
+			else if($pension_paper_submit == 'No')
+			{
+				$pstatus = xss_clean($this->input->post('submission_status2'));
+			}
+
+			else
+			{
+				$pstatus = xss_clean($this->input->post('submission_status1'));
+			}
+
+			
+			$pensiontype                = xss_clean($this->input->post('pension_type'));
+			$name                       = xss_clean($this->input->post('name'));
+			$empdesg                    = xss_clean($this->input->post('emp_designation'));
+			$name_familymember          = xss_clean($this->input->post('name_familymember'));
+			$retire_date                = xss_clean($this->input->post('date_ret'));
+			$retire_date 				= str_replace('/', '-', $retire_date);
+			$retire_date				= date('Y-m-d', strtotime($retire_date));
+			$death_date                 = xss_clean($this->input->post('date_death'));
+			$death_date 				= str_replace('/', '-', $death_date);
+			$death_date					= date('Y-m-d', strtotime($death_date));
+			$mobile_no                  = xss_clean($this->input->post('mobile_no'));
+			$email                      = xss_clean($this->input->post('email'));
+			$gender                     = xss_clean($this->input->post('gender'));
+			$pstatus                    = $pstatus;
+			$relation                   = xss_clean($this->input->post('relation'));
+			$address                    = xss_clean($this->input->post('address'));
+			$organisation               = xss_clean($this->input->post('organisation'));
+			$division                   = xss_clean($this->input->post('division'));
+			$service_book               = xss_clean($this->input->post('service_book'));
+			$pao_status                 = xss_clean($this->input->post('pao_status'));
+			$ppo_number                 = trim($this->input->post('ppo_number'));
+			$pensioner_status           = xss_clean($this->input->post('status_pensioner'));
+			$specific_details           = xss_clean($this->input->post('specific_details'));
+			$terminal_benifits          = xss_clean($this->input->post('terminal_ben'));
+			$withdrawal                 = xss_clean($this->input->post('withdrawal'));
+			$remarks                    = xss_clean($this->input->post('remarks'));
+			$accept                     = xss_clean($this->input->post('accept'));
+			$aadhar_no                  = xss_clean($this->input->post('aadhar_no'));
+			$pan_no                     = xss_clean($this->input->post('pan_no'));
+			$pension_paper_submit_status = $pension_paper_submit_status;
+			$pension_paper_submission_date = xss_clean($this->input->post('pension_paper_submission_date'));
+			$pension_paper_submission_date 	= str_replace('/', '-', $pension_paper_submission_date);
+			$pension_paper_submission_date	= date('Y-m-d', strtotime($pension_paper_submission_date));
+			 //exit;
+			$this->form_validation->set_rules('name','Name','trim|required');
+			$this->form_validation->set_rules('emp_designation','Employee Designation','trim|required');
+			$this->form_validation->set_rules('mobile_no','Mobile No','trim|required|regex_match[/^[0-9]{10}$/]');
+			$this->form_validation->set_rules('gender','Gender','trim|required');
+			//$this->form_validation->set_rules('pstatus','Pension status','trim|required');
+			$this->form_validation->set_rules('relation','Relation','trim|required');
+			$this->form_validation->set_rules('address','Address','trim|required');
+			$this->form_validation->set_rules('organisation','Organisation','trim|required');
+			//$this->form_validation->set_rules('aadhar_no','Aadhar No.','trim|required');
+			$this->form_validation->set_rules('pan_no','PAN No.','trim|required');
+			$this->form_validation->set_rules('division','Division Name','trim|required');
+			$this->form_validation->set_rules('pension_paper_submit','Pension Paeper Submit Status','trim|required');
+
+			//echo $ppo_number; exit;
+			
+			if($this->form_validation->run() === false) 
+				{ 
+					$data['insertData'] = array(
+						'pension_type' 					    => xss_clean($this->input->post('pension_type')),
+						'name'		  						=> xss_clean($this->input->post('name')),
+						'emp_designation'		  			=> xss_clean($this->input->post('emp_designation')),
+						'name_familymember' 		        => xss_clean($this->input->post('name_familymember')),
+						'date_ret' 							=> xss_clean($this->input->post('date_ret')),
+						'date_death' 						=> xss_clean($this->input->post('date_death')),
+						'mobile_no' 						=> xss_clean($this->input->post('mobile_no')),
+						'email' 							=> xss_clean($this->input->post('email')),
+						'gender' 							=> xss_clean($this->input->post('gender')),
+						'pstatus' 							=> xss_clean($this->input->post('pstatus')),
+						'relation' 							=> xss_clean($this->input->post('relation')),
+						'address' 							=> xss_clean($this->input->post('address')),
+						'organisation' 						=> xss_clean($this->input->post('organisation')),
+						'division' 							=> xss_clean($this->input->post('division')),
+						'service_book' 					    => xss_clean($this->input->post('service_book')),
+						'pao_status' 						=> xss_clean($this->input->post('pao_status')),
+						'ppo_number' 						=> trim($this->input->post('ppo_number')),
+						'status_pensioner' 			        => xss_clean($this->input->post('status_pensioner')),
+						'specific_details' 			        => xss_clean($this->input->post('specific_details')),
+						'terminal_ben' 					    => xss_clean($this->input->post('terminal_ben')),
+						'withdrawal' 						=> xss_clean($this->input->post('withdrawal')),
+						'remarks' 							=> xss_clean($this->input->post('remarks')),
+						'accept' 							=> xss_clean($this->input->post('accept')),
+						'aadhar_no' 						=> '',
+						'pan_no' 							=> '',
+						'pension_paper_submit'				=> xss_clean($this->input->post('pension_paper_submit')),
+
+					);
+
+          $data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+					$this->load->view('admin/header');
+					$this->load->view('admin/sidebar');
+					$this->load->view('admin/pension/addpension',$data);
+					$this->load->view('admin/footer');
+
+				} 
+				else
+				{ 
+					date_default_timezone_set('Asia/Calcutta'); 
+					$created_date =  date("Y-m-d H:i:s"); 
+
+					//$checked = $this->Base_model->check_existent('penscontinfo', array('EMAILID'=> $email));
+
+					$checked1 = $this->Base_model->check_existent('penscontinfo', array('MOBILENO'=> $mobile_no));
+					$checked2 = $this->Base_model->check_existent('pensrecoinfo', array('PPO_NO'=> $ppo_number));
+					
+				 if($checked1=='1'){
+						
+						$data['insertData'] = array(
+						'pension_type' 					    => xss_clean($this->input->post('pension_type')),
+						'name'		  						=> xss_clean($this->input->post('name')),
+						'emp_designation'		  			=> xss_clean($this->input->post('emp_designation')),
+						'name_familymember' 		        => xss_clean($this->input->post('name_familymember')),
+						'date_ret' 							=> xss_clean($this->input->post('date_ret')),
+						'date_death' 						=> xss_clean($this->input->post('date_death')),
+						'mobile_no' 						=> xss_clean($this->input->post('mobile_no')),
+						'email' 							=> xss_clean($this->input->post('email')),
+						'gender' 							=> xss_clean($this->input->post('gender')),
+						'pstatus' 							=> xss_clean($this->input->post('pstatus')),
+						'relation' 							=> xss_clean($this->input->post('relation')),
+						'address' 							=> xss_clean($this->input->post('address')),
+						'division' 							=> xss_clean($this->input->post('division')),
+						'service_book' 					    => xss_clean($this->input->post('service_book')),
+						'pao_status' 						=> xss_clean($this->input->post('pao_status')),
+						'ppo_number' 						=> trim($this->input->post('ppo_number')),
+						'status_pensioner' 			        => xss_clean($this->input->post('status_pensioner')),
+						'specific_details' 			        => xss_clean($this->input->post('specific_details')),
+						'terminal_ben' 					    => xss_clean($this->input->post('terminal_ben')),
+						'withdrawal' 						=> xss_clean($this->input->post('withdrawal')),
+						'remarks' 							=> xss_clean($this->input->post('remarks')),
+						'accept' 							=> xss_clean($this->input->post('accept')),
+						'aadhar_no' 						=> '',
+						'pan_no' 							=> '',
+						'pension_paper_submit'				=> xss_clean($this->input->post('pension_paper_submit')),
+					);
+
+						/*********logs code*******/
+
+						date_default_timezone_set('Asia/Calcutta'); 
+						$created_date =  date("Y-m-d H:i:s");
+						$user_logs_data = array(
+										'USERNAME' 	    => $this->session->userdata('user_name'),
+										'ROLE'			=> $this->session->userdata('user_role'),
+										'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+										'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+										'LOGINSTATUS' 	=> 'Logged in',
+										'ACTIVITY' 		=> $this->session->userdata('user_name').' failed to add pension ,mobile no. already exits',
+										'ACTIVITYTIME'  => time(),
+										'CREATEDDATED'  => $created_date
+										
+									);
+						$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+						 /*********ends logs code*******/
+						$msg = "Mobile No already exits, Please enter new one";
+						$this->session->set_flashdata('flashError_pension', $msg);
+                        $data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+						$this->load->view('admin/header');
+						$this->load->view('admin/sidebar');
+						$this->load->view('admin/pension/addpension',$data);
+						$this->load->view('admin/footer');
+						
+					}  else if($checked2=='1'){
+						
+						$data['insertData'] = array(
+						'pension_type' 					    => xss_clean($this->input->post('pension_type')),
+						'name'		  						=> xss_clean($this->input->post('name')),
+						'emp_designation'		  			=> xss_clean($this->input->post('emp_designation')),
+						'name_familymember' 		        => xss_clean($this->input->post('name_familymember')),
+						'date_ret' 							=> xss_clean($this->input->post('date_ret')),
+						'date_death' 						=> xss_clean($this->input->post('date_death')),
+						'mobile_no' 						=> xss_clean($this->input->post('mobile_no')),
+						'email' 							=> xss_clean($this->input->post('email')),
+						'gender' 							=> xss_clean($this->input->post('gender')),
+						'pstatus' 							=> xss_clean($this->input->post('pstatus')),
+						'relation' 							=> xss_clean($this->input->post('relation')),
+						'address' 							=> xss_clean($this->input->post('address')),
+						'division' 							=> xss_clean($this->input->post('division')),
+						'service_book' 					    => xss_clean($this->input->post('service_book')),
+						'pao_status' 						=> xss_clean($this->input->post('pao_status')),
+						'ppo_number' 						=> trim($this->input->post('ppo_number')),
+						'status_pensioner' 			        => xss_clean($this->input->post('status_pensioner')),
+						'specific_details' 			        => xss_clean($this->input->post('specific_details')),
+						'terminal_ben' 					    => xss_clean($this->input->post('terminal_ben')),
+						'withdrawal' 						=> xss_clean($this->input->post('withdrawal')),
+						'remarks' 							=> xss_clean($this->input->post('remarks')),
+						'accept' 							=> xss_clean($this->input->post('accept')),
+						'aadhar_no' 						=> '',
+						'pan_no' 							=> '',
+						'pension_paper_submit'				=> xss_clean($this->input->post('pension_paper_submit')),
+					);
+						
+						$msg = "PPO Number already exits, Please enter new one";
+						$this->session->set_flashdata('flashError_pension', $msg);
+                        $data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+						$this->load->view('admin/header');
+						$this->load->view('admin/sidebar');
+						$this->load->view('admin/pension/addpension',$data);
+						$this->load->view('admin/footer');
+						
+					}  
+
+					else
+					{
+					 $insert_penrecord = array(
+									'PPO_NO' 	         => empty($ppo_number)?NULL:$ppo_number,
+									'EMPLY_NAME' 	     => $name,
+									'EMP_DESG' 	         => $empdesg,
+									'FAMILYMEM_NAME'     => empty($name_familymember) ? NULL : $name_familymember,
+									'DATE_RETIREMENT' 	 => empty($retire_date) ? NULL : $retire_date,
+									'DATE_DEATH' 	     => empty($death_date) ? NULL : $death_date,
+									'organisation' 		 => empty($organisation) ? NULL : $organisation,
+									'DIVIS_DEAL_NAME' 	 => empty($division) ? NULL : $division,
+									'PENSION_STATUS' 	 => $pstatus,
+									'PENSION_TYPE' 	     => $pensiontype,
+									'PENSION_PAPER_SUBMIT_STATUS' =>$pension_paper_submit_status ,
+									'PENSION_PAPER_SUBMIT_DATE' => $pension_paper_submission_date,
+									'STATUS' 	         => 1,
+									'DELETES' 	         => 0,
+									'TERM_ACCEPT' 		 =>	$accept,
+									'CREATEDDATE' 	     => $created_date,
+									'LASTMODIDATE'       => $created_date,
+									'MODIFIEDBY_ID' 	 => $this->session->userdata('applicant_user_id'),
+									'CLIENT_IP' 	     => $_SERVER['REMOTE_ADDR']
+								);
+						$pensionid = $this->Base_model->insert_one_row('pensrecoinfo', $insert_penrecord);
+						
+
+						$insert_conrecord = array(
+									'FULLNAME' 	             => $name,
+									'MOBILENO' 	             => $mobile_no,
+									'EMAILID' 	             => $email,
+									'ADDRESS' 	             => $address,
+									'CONTACTYPE' 	         => 'SELF',
+									'STATUS' 	             =>  1,
+									'GENDER' 	             => $gender,
+									'AADHAR_NO' 	         => xss_clean($this->input->post('aadhar_no')),
+									'PAN_NO' 	             => xss_clean($this->input->post('pan_no')),
+									'RELATIONWITHPENSIONER'  => $relation,
+									'CRATEDDATE' 	         => $created_date,
+									'LASTUPDATE'             => $created_date,
+									'PENSION_ID' 	         => $pensionid
+								);
+								
+						$record_id = $this->Base_model->insert_one_row('penscontinfo', $insert_conrecord);
+						
+						
+						
+					$insert_pensionstatus = array(
+						'ANNUAL_VERIFICATION' 	         => empty($service_book) ? NULL : $service_book,
+						'PENDING_PPO' 	                 => empty($pao_status) ? NULL : $pao_status,
+						'STATUS_PENS_PAPER' 	         => empty($pensioner_status) ? NULL : $pensioner_status,
+						'TREMINAL_BENIFIT_GRANT' 	     => empty($specific_details) ? NULL : $specific_details,
+						'WITHDRAWAL_REQ_NSDL' 	         => empty($withdrawal) ? NULL : $withdrawal,
+						'STATUS_TERM_BENI_NOT_GRANT' 	 => empty($terminal_benifits) ? NULL : $terminal_benifits,
+						'PENSION_STATUS' 	             => $pstatus,
+						'MODIFIEDBY_ID' 	             => $this->session->userdata('applicant_user_id'),
+						'CLIENT_IP' 	                 => $_SERVER['REMOTE_ADDR'],
+						'CREATEDDATE' 	                 => $created_date,
+						'LASTMODIFIED'                   => $created_date,
+						'STATUS' 	                     => 1,
+						'PENSION_ID' 	                 => $pensionid
+					);
+
+						$status_id = $this->Base_model->insert_one_row('pensrecostatus', $insert_pensionstatus);
+						
+						
+						$insert_remark = array(
+									'DESCRIPTION' 	 => empty($remarks) ? NULL : $remarks,
+									'CREATEDDATE' 	 => $created_date,
+									'STATUS' 	     => 1,
+									'PENSION_ID' 	 => $pensionid
+								);
+						$insertid = $this->Base_model->insert_one_row('pensrecoremark', $insert_remark);
+						/// for adding certi status
+								
+						$this->Base_model->delete_record_by_id('penscertificate',array('ORGANISATION' => $organisation));
+						$insert_data = array(
+	      				  				'ORGANISATION'			=> $organisation,
+										'STATUS'            => 0,
+										'MODIFIEDBY_ID' 	  => $this->session->userdata('applicant_user_id'),
+										'CLIENT_IP'   			=>$_SERVER['REMOTE_ADDR'],
+										'CRATEDDATE'     		=> $created_date,
+										'LASTUPDATE' 	      => $created_date,
+									);
+
+	      			   $this->Base_model->insert_one_row('penscertificate', $insert_data);
+						
+						
+
+						if($insertid)
+						{
+
+						/*********logs code*******/
+
+						date_default_timezone_set('Asia/Calcutta'); 
+						$created_date =  date("Y-m-d H:i:s");
+						$user_logs_data = array(
+										'USERNAME' 	    => $this->session->userdata('user_name'),
+										'ROLE'			=> $this->session->userdata('user_role'),
+										'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+										'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+										'LOGINSTATUS' 	=> 'Logged in',
+										'ACTIVITY' 		=> $this->session->userdata('user_name').' added pension of '.$name,
+										'ACTIVITYTIME'  => time(),
+										'CREATEDDATED'  => $created_date
+										
+									);
+						$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+						 /*********ends logs code*******/
+
+							$msg = "Pension Record added successfully.";
+							$this->session->set_flashdata('flashSuccess_pension',$msg);
+							$data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+							$user_id = $this->session->userdata('applicant_user_id');
+							redirect('pension/index/'.$user_id,$data);
+							//redirect('pension',$data);
+						}
+
+						else
+						{
+							/*********logs code*******/
+
+						date_default_timezone_set('Asia/Calcutta'); 
+						$created_date =  date("Y-m-d H:i:s");
+						$user_logs_data = array(
+										'USERNAME' 	    => $this->session->userdata('user_name'),
+										'ROLE'			=> $this->session->userdata('user_role'),
+										'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+										'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+										'LOGINSTATUS' 	=> 'Logged in',
+										'ACTIVITY' 		=> $this->session->userdata('user_name').' failed to added pension',
+										'ACTIVITYTIME'  => time(),
+										'CREATEDDATED'  => $created_date
+										
+									);
+						$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+						 /*********ends logs code*******/
+
+							$msg = "Fail to add Pension Record";
+							$this->session->set_flashdata('flashError_pension', $msg);
+							$data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+							$this->load->view('admin/header');
+							$this->load->view('admin/sidebar');
+							$this->load->view('admin/pension/addpension');
+							$this->load->view('admin/footer');
+						}
+					}
+				}
+
+		}
+
+		else
+		{
+			
+			$data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+			$this->load->view('admin/header');
+			$this->load->view('admin/sidebar');
+			$this->load->view('admin/pension/addpension',$data);
+			$this->load->view('admin/footer');
+
+		}
+		}//ends else session chcek
+	}
+	
+	//Edit pension code
+	
+	public function edit_pension()
+	{
+		$segment_id = $this->uri->segment('4');
+		$uri_check = $this->session->userdata('applicant_user_id');
+
+		if($segment_id!=$uri_check)
+		{
+			$base_url = base_url();
+			redirect($base_url.'Frontend/logout');
+		}
+
+		else
+		{
+		
+		 $uri = $this->uri->segment('3');
+		
+		
+		if(isset($_REQUEST['submit'])) 
+		{
+			
+			$uri = $this->uri->segment('3');
+			$pension_paper_submit_status       = xss_clean($this->input->post('pension_paper_submit'));
+
+			if($pension_paper_submit == 'Yes')
+			{
+				$pstatus = xss_clean($this->input->post('submission_status1'));
+				$pension_paper_submission_date = xss_clean($this->input->post('pension_paper_submission_date'));
+			}
+
+			else if($pension_paper_submit == 'No')
+			{
+				$pstatus = xss_clean($this->input->post('submission_status2'));
+				$pension_paper_submission_date = '';
+			}
+
+			else
+			{
+				$pstatus = xss_clean($this->input->post('submission_status1'));
+				$pension_paper_submission_date = xss_clean($this->input->post('pension_paper_submission_date'));
+			}
+
+			$pensiontype  = xss_clean($this->input->post('pension_type'));
+			$name  = xss_clean($this->input->post('name'));
+			$empdesg       = xss_clean($this->input->post('emp_designation'));
+			$name_familymember = xss_clean($this->input->post('name_familymember'));
+			$retire_date  = xss_clean($this->input->post('date_ret'));
+			$death_date  = xss_clean($this->input->post('date_death'));
+			$mobile_no  = xss_clean($this->input->post('mobile_no'));
+			$email  = xss_clean($this->input->post('email'));
+			$gender  = xss_clean($this->input->post('gender'));
+			$pstatus  = $pstatus;
+			$relation  = xss_clean($this->input->post('relation'));
+			$address  = xss_clean($this->input->post('address'));
+			$division  = xss_clean($this->input->post('division'));
+			$service_book  = xss_clean($this->input->post('service_book'));
+			$pao_status  = xss_clean($this->input->post('pao_status'));
+			$ppo_number  = trim($this->input->post('ppo_number'));
+			$pensioner_status  = xss_clean($this->input->post('status_pensioner'));
+			$specific_details  = xss_clean($this->input->post('specific_details'));
+			$terminal_benifits  = xss_clean($this->input->post('terminal_ben'));
+			$withdrawal  = xss_clean($this->input->post('withdrawal'));
+			$remarks  = xss_clean($this->input->post('remarks'));
+			$pao_remarks  = xss_clean($this->input->post('pao_remarks'));
+			$accept  = xss_clean($this->input->post('accept'));
+			$aadhar_no   = xss_clean($this->input->post('aadhar_no'));
+			$pan_no      = xss_clean($this->input->post('pan_no'));
+			$pension_paper_submit_status = $pension_paper_submit_status;
+			$pension_paper_submission_date = $pension_paper_submission_date;
+			
+			$this->form_validation->set_rules('name','Name','trim|required');
+			$this->form_validation->set_rules('emp_designation','Employee Designation','trim|required');
+			$this->form_validation->set_rules('mobile_no','Mobile No','trim|required|regex_match[/^[0-9]{10}$/]');
+			$this->form_validation->set_rules('gender','Gender','trim|required');
+			$this->form_validation->set_rules('relation','Relation','trim|required');
+			$this->form_validation->set_rules('address','Address','trim|required');
+			$this->form_validation->set_rules('pan_no','PAN No.','trim|required');
+			$this->form_validation->set_rules('division','Division Name','trim|required');
+			$this->form_validation->set_rules('pension_paper_submit','Pension Paeper Submit Status','trim|required');
+			
+			if($this->form_validation->run() === false) 
+				{
+				    $data['pensioner_detail'] = $this->Base_model->get_pension_record($uri);
+				    $data['divisions_data'] = $this->Base_model->getall_divisions();
+				    $data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+					$this->load->view('admin/header');
+					$this->load->view('admin/sidebar');
+					$this->load->view('admin/pension/editpension',$data);
+					$this->load->view('admin/footer');
+
+				} 
+				else
+				{
+					$session_id = $this->session->userdata('applicant_user_id');
+					$user_data = $this->Base_model->get_record_by_id('users', array('USERS_ID' => $session_id));
+					if($user_data->ROLE_ID==3)
+					{
+						date_default_timezone_set('Asia/Calcutta'); 
+						$created_date =  date("Y-m-d H:i:s"); 
+							/***********Pdf upload*********	**/
+							if($_FILES['filesss']['name'])
+			                {
+			                  $configg = array(
+			                             'upload_path' => "./uploads/pension_files/",
+			                             'allowed_types' => "pdf|doc|docs|docx|",
+			                             'overwrite' => TRUE,
+			                             'max_size' => "1024", 
+			                             );              
+			                   $this->load->library('upload', $configg);
+			                   $this->upload->initialize($configg);
+			                   $pdf_namee=$_FILES['filesss']['name'];
+			                   $pic['item_image']= $pdf_namee;
+			                   $this->load->library('upload',$configg);
+			               	   $this->upload->initialize($configg);
+			                   if($this->upload->do_upload('filesss'))
+			                  {  
+			                     $file_data = $this->upload->data();  
+			                     $pdf_namee = $file_data['orig_name'];
+			                     $file_path ='uploads/pension_files'.$pdf_namee;
+			                  }
+
+			                  else
+			                  {
+			                    $error=$this->upload->display_errors();   
+			                  }
+			                }
+
+			                $pdf_name 	  	= str_replace(' ','_', $pdf_namee);
+
+			                date_default_timezone_set('Asia/Calcutta'); 
+							$created_date =  date("Y-m-d H:i:s"); 
+
+						 $penrecrd = $this->Base_model->get_record_by_id('pensrecoinfo',array('PENSION_ID'=> $uri,'STATUS'=>1));
+
+						   
+
+							 $update_data = array(
+											'PPO_NO' 	         => empty($ppo_number) ? NULL : $ppo_number,
+											'EMPLY_NAME' 	     => $name,
+											'EMP_DESG' 	         => $empdesg,
+											'FAMILYMEM_NAME'     => empty($name_familymember) ? NULL : $name_familymember,
+											'DATE_RETIREMENT' 	 => empty($retire_date) ? NULL : $retire_date,
+											'DATE_DEATH' 	     => empty($death_date) ? NULL : $death_date,
+											'DIVIS_DEAL_NAME' 	 => empty($division) ? NULL : $division,
+											'PENSION_STATUS' 	 => $pstatus,
+											'PENSION_TYPE' 	     => $pensiontype,
+											'PENSION_PAPER_SUBMIT_STATUS' =>$pension_paper_submit_status ,
+											'PENSION_PAPER_SUBMIT_DATE' => $pension_paper_submission_date,
+											'STATUS' 	         => 1,
+											'DELETES' 	         => 0,
+											'TERM_ACCEPT' 		 =>	$accept,
+											'CREATEDDATE' 	     => $penrecrd->CREATEDDATE,
+											'LASTMODIDATE'       => $created_date,
+											'MODIFIEDBY_ID' 	 => $this->session->userdata('applicant_user_id'),
+											'CLIENT_IP' 	     => $_SERVER['REMOTE_ADDR']
+										);
+										
+							$updateid = $this->Base_model->update_record_by_id('pensrecoinfo', $update_data, array('PENSION_ID'=> $uri));
+
+							$pencontact = $this->Base_model->get_record_by_id('penscontinfo',array('PENSION_ID'=> $uri,'STATUS'=>1));
+
+								$update_data1 = array(
+											'FULLNAME' 	             => $pencontact->FULLNAME,
+											'MOBILENO' 	             => $pencontact->MOBILENO,
+											'EMAILID' 	             => $pencontact->EMAILID,
+											'ADDRESS' 	             => $pencontact->ADDRESS,
+											'AADHAR_NO' 	         => $aadhar_no,
+											'PAN_NO' 	             => $pan_no,
+											'CONTACTYPE' 	         => 'SELF',
+											'STATUS' 	             =>  0,
+											'GENDER' 	             => $pencontact->GENDER,
+											'RELATIONWITHPENSIONER'  => $pencontact->RELATIONWITHPENSIONER,
+											'CRATEDDATE' 	         => $pencontact->CRATEDDATE,
+											'LASTUPDATE'             => $created_date
+										);
+										
+							$updateid1 = $this->Base_model->update_record_by_id('penscontinfo', $update_data1, array('PENSION_ID'=> $uri));
+								
+								
+								$insert_conrecord = array(
+											'FULLNAME' 	             => $name,
+											'MOBILENO' 	             => $mobile_no,
+											'EMAILID' 	             => $email,
+											'ADDRESS' 	             => $address,
+											'CONTACTYPE' 	         => 'SELF',
+											'STATUS' 	             =>  1,
+											'AADHAR_NO' 	         => $aadhar_no,
+											'PAN_NO' 	             => $pan_no,
+											'GENDER' 	             => $gender,
+											'RELATIONWITHPENSIONER'  => $relation,
+											'CRATEDDATE' 	         => $created_date,
+											'LASTUPDATE'             => $created_date,
+											'PENSION_ID' 	         => $uri
+										);
+										
+								$record_id = $this->Base_model->insert_one_row('penscontinfo', $insert_conrecord);
+								
+								//insert pdf
+
+								$insert_pdfrecord = array(
+											'FILE'					 => $pdf_name,
+											'STATUS' 	             =>  1,
+											'CRATEDDATE' 	         => $created_date,
+											'LASTUPDATE'             => $created_date,
+											'PENSION_ID' 	         => $uri,
+											'MODIFIEDBY_ID' 	 => $this->session->userdata('applicant_user_id'),
+											'CLIENT_IP' 	     => $_SERVER['REMOTE_ADDR']
+										);
+
+								$this->Base_model->insert_one_row('penspdf', $insert_pdfrecord);
+										
+
+							$penrecstatus = $this->Base_model->get_record_by_id('pensrecostatus',array('PENSION_ID'=> $uri,'STATUS'=>1));
+
+							$update_data2 = array(
+										'ANNUAL_VERIFICATION' 	         => $penrecstatus->ANNUAL_VERIFICATION,
+										'PENDING_PPO' 	                 => $penrecstatus->PENDING_PPO,
+										'STATUS_PENS_PAPER' 	         => $penrecstatus->STATUS_PENS_PAPER,
+										'TREMINAL_BENIFIT_GRANT' 	     => $penrecstatus->TREMINAL_BENIFIT_GRANT,
+										'WITHDRAWAL_REQ_NSDL' 	         => $penrecstatus->WITHDRAWAL_REQ_NSDL,
+										'STATUS_TERM_BENI_NOT_GRANT' 	 => $penrecstatus->STATUS_TERM_BENI_NOT_GRANT,
+										'PENSION_STATUS' 	             => $penrecstatus->PENSION_STATUS,
+										'MODIFIEDBY_ID' 	             => $this->session->userdata('applicant_user_id'),
+										'CLIENT_IP' 	                 => $_SERVER['REMOTE_ADDR'],
+										'CREATEDDATE' 	                 => $penrecstatus->CREATEDDATE,
+										'LASTMODIFIED'                   => $created_date,
+										'STATUS' 	                     => 0
+									);
+								
+						$updateid2 = $this->Base_model->update_record_by_id('pensrecostatus', $update_data2, array('PENSION_ID'=> $uri));
+								
+						$insert_pensionstatus = array(
+									'ANNUAL_VERIFICATION' 	         => empty($service_book) ? NULL : $service_book,
+									'PENDING_PPO' 	                 => empty($pao_status) ? NULL : $pao_status,
+									'STATUS_PENS_PAPER' 	         => empty($pensioner_status) ? NULL : $pensioner_status,
+									'TREMINAL_BENIFIT_GRANT' 	     => empty($specific_details) ? NULL : $specific_details,
+									'WITHDRAWAL_REQ_NSDL' 	         => empty($withdrawal) ? NULL : $withdrawal,
+									'STATUS_TERM_BENI_NOT_GRANT' 	 => empty($terminal_benifits) ? NULL : $terminal_benifits,
+									'PENSION_STATUS' 	             => $pstatus,
+									'MODIFIEDBY_ID' 	             => $this->session->userdata('applicant_user_id'),
+									'CLIENT_IP' 	                 => $_SERVER['REMOTE_ADDR'],
+									'CREATEDDATE' 	                 => $created_date,
+									'LASTMODIFIED'                   => $created_date,
+									'STATUS' 	                     => 1,
+									'PENSION_ID' 	                 => $uri
+								);
+
+							$status_id = $this->Base_model->insert_one_row('pensrecostatus', $insert_pensionstatus);
+
+							$penremark = $this->Base_model->get_record_by_id('pensrecoremark',array('PENSION_ID'=> $uri,'STATUS'=>1));
+							
+							$update_data3 = array(
+										'DESCRIPTION' 	 => $penremark->DESCRIPTION,
+										'PAO_DESCRIPTION' => $penremark->PAO_DESCRIPTION,
+										'STATUS' 	     => 0,
+										'CREATEDDATE' 	 => $penremark->CREATEDDATE,
+										'LASTMODIFIED'   => $created_date,
+									);
+								
+						$updateid3 = $this->Base_model->update_record_by_id('pensrecoremark', $update_data3, array('PENSION_ID'=> $uri));
+
+
+							$insert_remark = array(
+									'DESCRIPTION' 	 => empty($remarks) ? NULL : $remarks,
+									'PAO_DESCRIPTION' 	 => empty($pao_remarks) ? NULL : $pao_remarks,
+									'STATUS' 	     => 1,
+									'CREATEDDATE' 	 => $created_date,
+									'LASTMODIFIED'   => $created_date,
+									'PENSION_ID' 	 => $uri
+								);
+
+								$finalid = $this->Base_model->insert_one_row('pensrecoremark', $insert_remark);
+								
+
+							if($finalid)
+							{
+								/*********logs code*******/
+
+								date_default_timezone_set('Asia/Calcutta'); 
+								$created_date =  date("Y-m-d H:i:s");
+								$user_logs_data = array(
+												'USERNAME' 	    => $this->session->userdata('user_name'),
+												'ROLE'			=> $this->session->userdata('user_role'),
+												'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+												'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+												'LOGINSTATUS' 	=> 'Logged in',
+												'ACTIVITY' 		=> $this->session->userdata('user_name').' updated pension of '.$name,
+												'ACTIVITYTIME'  => time(),
+												'CREATEDDATED'  => $created_date
+												
+											);
+							$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+						 /*********ends logs code*******/
+
+								$msg = "Pension Record updated successfully.";
+								$this->session->set_flashdata('flashSuccess_pension',$msg);
+								$data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+								$user_id = $this->session->userdata('applicant_user_id');
+								redirect('pension/index/'.$user_id,$data);
+								//redirect('pension',$data);
+							}
+
+							else
+							{
+
+								/*********logs code*******/
+
+								date_default_timezone_set('Asia/Calcutta'); 
+								$created_date =  date("Y-m-d H:i:s");
+								$user_logs_data = array(
+												'USERNAME' 	    => $this->session->userdata('user_name'),
+												'ROLE'			=> $this->session->userdata('user_role'),
+												'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+												'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+												'LOGINSTATUS' 	=> 'Logged in',
+												'ACTIVITY' 		=> $this->session->userdata('user_name').' failed to update pension of '.$name,
+												'ACTIVITYTIME'  => time(),
+												'CREATEDDATED'  => $created_date
+												
+											);
+							$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+						 /*********ends logs code*******/
+
+
+								$msg = "Fail to update Pension Record";
+								$this->session->set_flashdata('flashError_pension', $msg);
+								$data['pensioner_detail'] = $this->Base_model->get_pension_record($uri);
+								$data['divisions_data'] = $this->Base_model->getall_divisions();
+								$data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+								$this->load->view('admin/header');
+								$this->load->view('admin/sidebar');
+								$this->load->view('admin/pension/editpension',$data);
+								$this->load->view('admin/footer');
+							}
+							
+
+			
+					}
+
+					else
+					{
+							date_default_timezone_set('Asia/Calcutta'); 
+							$created_date =  date("Y-m-d H:i:s"); 
+
+						   $penrecrd = $this->Base_model->get_record_by_id('pensrecoinfo',array('PENSION_ID'=> $uri,'STATUS'=>1));
+
+							 $update_data = array(
+											'PPO_NO' 	         => empty($ppo_number) ? NULL : $ppo_number,
+											'EMPLY_NAME' 	     => $name,
+											'EMP_DESG' 	         => $empdesg,
+											'FAMILYMEM_NAME'     => empty($name_familymember) ? NULL : $name_familymember,
+											'DATE_RETIREMENT' 	 => empty($retire_date) ? NULL : $retire_date,
+											'DATE_DEATH' 	     => empty($death_date) ? NULL : $death_date,
+											'DIVIS_DEAL_NAME' 	 => empty($division) ? NULL : $division,
+											'PENSION_STATUS' 	 => $pstatus,
+											'PENSION_TYPE' 	     => $pensiontype,
+											'PENSION_PAPER_SUBMIT_STATUS' =>$pension_paper_submit_status ,
+											'PENSION_PAPER_SUBMIT_DATE' => $pension_paper_submission_date,
+											'STATUS' 	         => 1,
+											'DELETES' 	         => 0,
+											'TERM_ACCEPT' 		 =>	$accept,
+											'CREATEDDATE' 	     => $penrecrd->CREATEDDATE,
+											'LASTMODIDATE'       => $created_date,
+											'MODIFIEDBY_ID' 	 => $this->session->userdata('applicant_user_id'),
+											'CLIENT_IP' 	     => $_SERVER['REMOTE_ADDR']
+										);
+										
+							$updateid = $this->Base_model->update_record_by_id('pensrecoinfo', $update_data, array('PENSION_ID'=> $uri));
+
+							$pencontact = $this->Base_model->get_record_by_id('penscontinfo',array('PENSION_ID'=> $uri,'STATUS'=>1));
+
+								$update_data1 = array(
+											'FULLNAME' 	             => $pencontact->FULLNAME,
+											'MOBILENO' 	             => $pencontact->MOBILENO,
+											'EMAILID' 	             => $pencontact->EMAILID,
+											'ADDRESS' 	             => $pencontact->ADDRESS,
+											'AADHAR_NO' 	         => $aadhar_no,
+											'PAN_NO' 	             => $pan_no,
+											'CONTACTYPE' 	         => 'SELF',
+											'STATUS' 	             =>  0,
+											'GENDER' 	             => $pencontact->GENDER,
+											'RELATIONWITHPENSIONER'  => $pencontact->RELATIONWITHPENSIONER,
+											'CRATEDDATE' 	         => $pencontact->CRATEDDATE,
+											'LASTUPDATE'             => $created_date
+										);
+										
+							$updateid1 = $this->Base_model->update_record_by_id('penscontinfo', $update_data1, array('PENSION_ID'=> $uri));
+								
+								
+								$insert_conrecord = array(
+											'FULLNAME' 	             => $name,
+											'MOBILENO' 	             => $mobile_no,
+											'EMAILID' 	             => $email,
+											'ADDRESS' 	             => $address,
+											'CONTACTYPE' 	         => 'SELF',
+											'STATUS' 	             =>  1,
+											'AADHAR_NO' 	         => $aadhar_no,
+											'PAN_NO' 	             => $pan_no,
+											'GENDER' 	             => $gender,
+											'RELATIONWITHPENSIONER'  => $relation,
+											'CRATEDDATE' 	         => $created_date,
+											'LASTUPDATE'             => $created_date,
+											'PENSION_ID' 	         => $uri
+										);
+										
+								$record_id = $this->Base_model->insert_one_row('penscontinfo', $insert_conrecord);
+								
+							$penrecstatus = $this->Base_model->get_record_by_id('pensrecostatus',array('PENSION_ID'=> $uri,'STATUS'=>1));
+
+								$update_data2 = array(
+											'ANNUAL_VERIFICATION' 	         => $penrecstatus->ANNUAL_VERIFICATION,
+											'PENDING_PPO' 	                 => $penrecstatus->PENDING_PPO,
+											'STATUS_PENS_PAPER' 	         => $penrecstatus->STATUS_PENS_PAPER,
+											'TREMINAL_BENIFIT_GRANT' 	     => $penrecstatus->TREMINAL_BENIFIT_GRANT,
+											'WITHDRAWAL_REQ_NSDL' 	         => $penrecstatus->WITHDRAWAL_REQ_NSDL,
+											'STATUS_TERM_BENI_NOT_GRANT' 	 => $penrecstatus->STATUS_TERM_BENI_NOT_GRANT,
+											'PENSION_STATUS' 	             => $penrecstatus->PENSION_STATUS,
+											'MODIFIEDBY_ID' 	             => $this->session->userdata('applicant_user_id'),
+											'CLIENT_IP' 	                 => $_SERVER['REMOTE_ADDR'],
+											'CREATEDDATE' 	                 => $penrecstatus->CREATEDDATE,
+											'LASTMODIFIED'                   => $created_date,
+											'STATUS' 	                     => 0
+										);
+								
+						$updateid2 = $this->Base_model->update_record_by_id('pensrecostatus', $update_data2, array('PENSION_ID'=> $uri));
+								
+						  $insert_pensionstatus = array(
+
+								'ANNUAL_VERIFICATION' 	         => empty($service_book) ? NULL : $service_book,
+								'PENDING_PPO' 	                 => empty($pao_status) ? NULL : $pao_status,
+								'STATUS_PENS_PAPER' 	         => empty($pensioner_status) ? NULL : $pensioner_status,
+								'TREMINAL_BENIFIT_GRANT' 	     => empty($specific_details) ? NULL : $specific_details,
+								'WITHDRAWAL_REQ_NSDL' 	         => empty($withdrawal) ? NULL : $withdrawal,
+								'STATUS_TERM_BENI_NOT_GRANT' 	 => empty($terminal_benifits) ? NULL : $terminal_benifits,
+								'PENSION_STATUS' 	             => $pstatus,
+								'MODIFIEDBY_ID' 	             => $this->session->userdata('applicant_user_id'),
+								'CLIENT_IP' 	                 => $_SERVER['REMOTE_ADDR'],
+								'CREATEDDATE' 	                 => $created_date,
+								'LASTMODIFIED'                   => $created_date,
+								'STATUS' 	                     => 1,
+								'PENSION_ID' 	                 => $uri
+
+							);
+
+						$status_id = $this->Base_model->insert_one_row('pensrecostatus', $insert_pensionstatus);
+
+						$penremark = $this->Base_model->get_record_by_id('pensrecoremark',array('PENSION_ID'=> $uri,'STATUS'=>1));
+						
+						$update_data3 = array(
+									'DESCRIPTION' 	 => $penremark->DESCRIPTION,
+									'PAO_DESCRIPTION' 	 => empty($pao_remarks) ? NULL : $pao_remarks,
+									'STATUS' 	     => 0,
+									'CREATEDDATE' 	 => $penremark->CREATEDDATE,
+									'LASTMODIFIED'   => $created_date,
+								);
+								
+						$updateid3 = $this->Base_model->update_record_by_id('pensrecoremark', $update_data3, array('PENSION_ID'=> $uri));
+
+
+									$insert_remark = array(
+											'DESCRIPTION' 	 => empty($remarks) ? NULL : $remarks,
+											'DESCRIPTION' 	 => empty($remarks) ? NULL : $remarks,
+											'STATUS' 	     => 1,
+											'CREATEDDATE' 	 => $created_date,
+											'LASTMODIFIED'   => $created_date,
+											'PENSION_ID' 	 => $uri
+										);
+
+								$finalid = $this->Base_model->insert_one_row('pensrecoremark', $insert_remark);
+								
+
+							if($finalid)
+							{
+											/*********logs code*******/
+
+											date_default_timezone_set('Asia/Calcutta'); 
+											$created_date =  date("Y-m-d H:i:s");
+											$user_logs_data = array(
+															'USERNAME' 	    => $this->session->userdata('user_name'),
+															'ROLE'			=> $this->session->userdata('user_role'),
+															'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+															'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+															'LOGINSTATUS' 	=> 'Logged in',
+															'ACTIVITY' 		=> $this->session->userdata('user_name').' updated pension of '.$name,
+															'ACTIVITYTIME'  => time(),
+															'CREATEDDATED'  => $created_date
+															
+														);
+										$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+									 /*********ends logs code*******/
+
+								$msg = "Pension Record updated successfully.";
+								$this->session->set_flashdata('flashSuccess_pension',$msg);
+								$data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+								$user_id = $this->session->userdata('applicant_user_id');
+								redirect('pension/index/'.$user_id,$data);
+								//redirect('pension',$data);
+							}
+
+							else
+							{
+								/*********logs code*******/
+
+											date_default_timezone_set('Asia/Calcutta'); 
+											$created_date =  date("Y-m-d H:i:s");
+											$user_logs_data = array(
+															'USERNAME' 	    => $this->session->userdata('user_name'),
+															'ROLE'			=> $this->session->userdata('user_role'),
+															'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+															'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+															'LOGINSTATUS' 	=> 'Logged in',
+															'ACTIVITY' 		=> $this->session->userdata('user_name').' failed to update pension of '.$name,
+															'ACTIVITYTIME'  => time(),
+															'CREATEDDATED'  => $created_date
+															
+														);
+										$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+								/*********ends logs code*******/
+
+								$msg = "Fail to update Pension Record";
+								$this->session->set_flashdata('flashError_pension', $msg);
+								$data['pensioner_detail'] = $this->Base_model->get_pension_record($uri);
+								$data['divisions_data'] = $this->Base_model->getall_divisions();
+								$data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+								$this->load->view('admin/header');
+								$this->load->view('admin/sidebar');
+								$this->load->view('admin/pension/editpension',$data);
+								$this->load->view('admin/footer');
+							}
+							
+						}
+
+					}//ends elsee ndnndnndn
+					
+
+		}
+
+		else
+		{ 
+				$session_id = $this->session->userdata('applicant_user_id');
+				$user_data = $this->Base_model->get_record_by_id('users', array('USERS_ID' => $session_id));
+				
+				if($user_data->ROLE_ID =='3')
+				{
+					$uri = $this->uri->segment('3');//print_r($uri);exit;
+					$data['pensioner_detail'] = $this->Base_model->get_pension_record($uri);
+					$data['divisions_data'] = $this->Base_model->getall_divisions();
+					$data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+					
+					$this->load->view('admin/header');
+					$this->load->view('admin/sidebar');
+				    $this->load->view('admin/pension/editpension_pao',$data);
+					$this->load->view('admin/footer');
+				}
+
+				else
+				{
+					$uri = $this->uri->segment('3');
+					$data['pensioner_detail'] = $this->Base_model->get_pension_record($uri);
+
+					// print_r($data['pensioner_detail']);exit;
+					$data['divisions_data'] = $this->Base_model->getall_divisions();
+					$data['all_organizations'] = $this->Base_model->get_all_record_by_condition('organization',array('delete_status' => 0));
+					
+					$this->load->view('admin/header');
+					$this->load->view('admin/sidebar');
+				    $this->load->view('admin/pension/editpension',$data);
+					$this->load->view('admin/footer');
+				}
+				
+		  }
+		}// ends else session check
+		
+	}// ends function
+	
+	
+	
+	public function delete_pension(){
+		
+		  $session_id = xss_clean($this->input->post('session_id'));
+			$uri = $this->session->userdata('applicant_user_id');
+
+			if($session_id!=$uri)
+			{
+				$base_url = base_url();
+				redirect($base_url.'Frontend/logout');
+			}
+
+			else
+			{
+				date_default_timezone_set('Asia/Calcutta'); 
+			$created_date =  date("Y-m-d H:i:s"); 
+			//$delete_itemId = xss_clean($this->input->post('delete_itemId'));
+			$delete_itemId = xss_clean($this->input->post('id'));
+			
+             $data['post_data'] = $post_data =  $this->Base_model->get_record_by_id('pensrecoinfo', array('PENSION_ID' => $delete_itemId));			
+			
+			$update_data = array(
+					'PENSION_ID' 	    => $post_data->PENSION_ID,
+					'PPO_NO' 	        => $post_data->PPO_NO,
+					'EMPLY_NAME' 	    => $post_data->EMPLY_NAME,
+					'FAMILYMEM_NAME' 	=> $post_data->FAMILYMEM_NAME,
+					'DATE_RETIREMENT' 	=> $post_data->DATE_RETIREMENT,
+					'DATE_DEATH' 	    => $post_data->DATE_DEATH,
+					'DIVIS_DEAL_NAME'   => $post_data->DIVIS_DEAL_NAME,
+					'PENSION_STATUS' 	=> $post_data->PENSION_STATUS,
+					'PENSION_TYPE' 	    => $post_data->PENSION_TYPE,
+					'TERM_ACCEPT' 	    => $post_data->TERM_ACCEPT,
+					'DELETES'           => 1,
+					'CREATEDDATE' 	    => $created_date,
+					'LASTMODIDATE'   	=> $created_date,
+					'MODIFIEDBY_ID'     => $this->session->userdata('applicant_user_id'),
+					'CLIENT_IP' 	    => $_SERVER['REMOTE_ADDR']
+				);
+							
+			$updateid = $this->Base_model->update_record_by_id('pensrecoinfo', $update_data, array('PENSION_ID'=> $delete_itemId));
+						/*********logs code*******/
+
+											date_default_timezone_set('Asia/Calcutta'); 
+											$created_date =  date("Y-m-d H:i:s");
+											$user_logs_data = array(
+															'USERNAME' 	    => $this->session->userdata('user_name'),
+															'ROLE'			=> $this->session->userdata('user_role'),
+															'USEREMAIL' 	=> $this->session->userdata('applicant_email'),
+															'CLIENT_IP' 	=> $_SERVER['REMOTE_ADDR'],
+															'LOGINSTATUS' 	=> 'Logged in',
+															'ACTIVITY' 		=> $this->session->userdata('user_name').'delete pension of '.$post_data->EMPLY_NAME,
+															'ACTIVITYTIME'  => time(),
+															'CREATEDDATED'  => $created_date
+															
+														);
+										$this->Base_model->insert_one_row('userlogs', $user_logs_data);
+
+								/*********ends logs code*******/
+
+
+			$msg = "Pensioner record deleted successfully.";
+			$this->session->set_flashdata('flashSuccess_pension',$msg);					
+			$data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+			$this->load->view('admin/header');
+			$this->load->view('admin/sidebar');
+			$this->load->view('admin/pension/pensionlist',$data);
+			$this->load->view('admin/footer');
+
+			}// ends else session check
+		  
+		
+	}//ends function
+	
+	
+		
+	public function view_pension(){
+		
+		$uri = $this->uri->segment('3');
+		$data['pensioner_detail'] = $this->Base_model->get_pension_record($uri);
+		$this->load->view('admin/header');
+		$this->load->view('admin/sidebar');
+		$this->load->view('admin/pension/viewpension',$data);
+		$this->load->view('admin/footer');
+		
+	}
+
+	
+		  public function search_penion()
+	     {
+			if(isset($_REQUEST['submit'])){
+
+					$pension_status = xss_clean($this->input->post('pension_status'));
+					$pension_type   = xss_clean($this->input->post('pension_type'));
+
+					if($pension_status== 'All')
+					{
+						$pension_status = '';	
+					}
+					else
+					{
+						$pension_status = $pension_status;
+					}
+					$data['all_pensions'] = $this->Base_model->search_pension($pension_status,$pension_type);
+					$this->load->view('admin/header');
+					$this->load->view('admin/sidebar');
+					$this->load->view('admin/pension/pensionlist',$data);
+					$this->load->view('admin/footer');
+			}
+
+			else
+			{
+				$userdata = $this->Base_model->get_record_by_id('users',array('USERS_ID'=>$this->session->userdata('applicant_user_id')));
+
+				if($userdata->ORGANIZATION_ID != 0){
+		               
+		               $data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0,'ORGANISATION'=>$userdata->ORGANIZATION_ID));
+
+				} else {
+
+		              $data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+				}
+				
+				$this->load->view('admin/header');
+				$this->load->view('admin/sidebar');
+				$this->load->view('admin/pension/pensionlist',$data);
+				$this->load->view('admin/footer');
+			}
+		
+	      }//ends function//
+
+	      // function for generating certicate
+
+	      public function generate_certificate()
+	      {
+	      	date_default_timezone_set('Asia/Calcutta'); 
+					$created_date =  date("Y-m-d H:i:s"); 
+
+	      	if(isset($_REQUEST['submit']))
+	      	{
+	      		date_default_timezone_set('Asia/Calcutta'); 
+						$created_date =  date("Y-m-d H:i:s"); 
+
+
+	      			$organisation_id = xss_clean($this->input->post('orgn_id'));
+	      			$checked_orgn = $this->Base_model->check_existent('penscertificate', array('ORGANISATION'=> $organisation_id,'STATUS'=>0));
+	      			$checked_orgn2 = $this->Base_model->check_existent('penscertificate', array('ORGANISATION'=> $organisation_id,'STATUS'=>1));
+
+	      			if($checked_orgn == '1')
+	      			{
+	      						$update_data = array(
+		      				  'ORGANISATION'			=> $organisation_id,
+										'STATUS'            => 1,
+										'MODIFIEDBY_ID' 	  => $this->session->userdata('applicant_user_id'),
+										'CLIENT_IP'   			=>$_SERVER['REMOTE_ADDR'],
+										'CRATEDDATE'     		=> $created_date,
+										'LASTUPDATE' 	      => $created_date,
+									);
+								
+									$updateid = $this->Base_model->update_record_by_id('penscertificate', $update_data, array('ORGANISATION'=> $organisation_id));
+
+										 $msg = "Certificate generated.";
+								 		 $this->session->set_flashdata('flashSuccess_orgcertificate',$msg);
+										$data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+										$user_id = $this->session->userdata('applicant_user_id');
+										redirect('pension/index/'.$user_id,$data);
+										//redirect('pension',$data);
+
+	      			}
+
+	      			else if($checked_orgn2 == '1')
+	      			{
+	      				date_default_timezone_set('Asia/Calcutta'); 
+								$created_date =  date("Y-m-d H:i:s"); 
+
+	      						$update_data = array(
+		      				  'ORGANISATION'			=> $organisation_id,
+										'STATUS'            => 1,
+										'MODIFIEDBY_ID' 	  => $this->session->userdata('applicant_user_id'),
+										'CLIENT_IP'   			=>$_SERVER['REMOTE_ADDR'],
+										'CRATEDDATE'     		=> $created_date,
+										'LASTUPDATE' 	      => $created_date,
+									);
+								
+									$updateid = $this->Base_model->update_record_by_id('penscertificate', $update_data, array('ORGANISATION'=> $organisation_id));
+										 $msg = "Certificate generated.";
+								 		$this->session->set_flashdata('flashSuccess_orgcertificate',$msg);
+										$data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+										$user_id = $this->session->userdata('applicant_user_id');
+										redirect('pension/index/'.$user_id,$data);
+										//redirect('pension',$data);
+
+	      			}
+
+	      			else
+	      			{
+	      				date_default_timezone_set('Asia/Calcutta'); 
+								$created_date =  date("Y-m-d H:i:s"); 
+								
+	      					$insert_data = array(
+		      				  'ORGANISATION'			=> $organisation_id,
+										'STATUS'            => 0,
+										'MODIFIEDBY_ID' 	  => $this->session->userdata('applicant_user_id'),
+										'CLIENT_IP'   			=>$_SERVER['REMOTE_ADDR'],
+										'CRATEDDATE'     		=> $created_date,
+										'LASTUPDATE' 	      => $created_date,
+									);
+
+	      				 $this->Base_model->insert_one_row('penscertificate', $insert_data);
+	      				 $msg = "Certificate generated.";
+								 $this->session->set_flashdata('flashSuccess_orgcertificate',$msg);
+	      				 $data['all_pensions'] = $this->Base_model->get_all_record_by_condition('pensrecoinfo',array('DELETES'=>0));
+	      				 	$user_id = $this->session->userdata('applicant_user_id');
+							redirect('pension/index/'.$user_id,$data);
+								// redirect('pension',$data);
+	      			}
+	      	}
+
+	      	else
+	      	{
+	      		$userdata = $this->Base_model->get_record_by_id('users',array('USERS_ID'=>$this->session->userdata('applicant_user_id')));
+
+	      		$orgn_data = $this->Base_model->get_record_by_id('organization',array('ORGANIZATION_ID'=>$userdata->ORGANIZATION_ID));
+
+	      		$data['orgn_name'] = $orgn_data->ORGNAME;
+	      		$data['orgn_id'] 	 = $orgn_data->ORGANIZATION_ID;
+	      		$data['date'] 		 =  date("Y-m-d");
+	      
+      			$this->load->view('admin/header');
+						$this->load->view('admin/sidebar');
+						$this->load->view('admin/pension/org_certificate',$data);
+						$this->load->view('admin/footer');
+	      	}
+
+	      }// ends function
+		  
+	
+}

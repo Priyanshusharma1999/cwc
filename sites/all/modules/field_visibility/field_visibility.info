@@ -1,0 +1,11 @@
+name = Node Field Visibility
+description = "Provides a UI for editing role level visibility of fields in Node Forms"
+core = 7.x
+package = Node
+
+; Information added by Drupal.org packaging script on 2016-09-07
+version = "7.x-1.0"
+core = "7.x"
+project = "field_visibility"
+datestamp = "1473270841"
+

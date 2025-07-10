@@ -1,0 +1,13 @@
+{
+  "name": "admin/cwc",
+  "description": "Drupal 7 site with Drush",
+  "type": "project",
+  "require": {
+    "drush/drush": "^8.4"
+  },
+  "config": {
+    "platform": {
+      "php": "7.4.4"
+    }
+  }
+}

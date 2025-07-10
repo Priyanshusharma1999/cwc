@@ -1,0 +1,55 @@
+<style>
+    #content{  
+        margin: 50px auto;
+        display: block;
+        width:1200px;
+        border: 2px solid #0f4c9f;
+    }
+    
+    table{
+        margin-bottom:20px;
+        width:1200px;
+        padding: 0 20px;
+    }
+    
+    label{
+        font-weight:600;
+    }
+    
+     .table td{
+            margin-bottom: 8px;
+            display: inline-block;
+            min-width: 48%;
+      }
+      
+      h3{
+          
+            text-align: left;
+            margin-bottom: 20px;
+            margin-top:0px;
+            background: #0f4c9f;
+            color: #fff;
+            padding: 5px 15px;
+            font-size: 18px;
+      }
+      
+      th{width:16.33%;}
+      
+      input,textarea{
+              border: 2px solid #0f4c9f;
+              padding:5px 10px;
+              width:100%;
+      }
+      
+      .edu-table input,textarea{
+              border: 2px solid #0f4c9f;
+              padding: 5px 10px;
+              width:80%;
+      }
+    
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.0.272/jspdf.debug.js"></script>

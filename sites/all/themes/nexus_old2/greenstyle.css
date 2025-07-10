@@ -1,0 +1,440 @@
+
+
+.region-district-information ul li a, .region-district-pofile ul li a, .region-sectors-departments ul li a {
+    color: #ff0;
+}
+body {
+    background: #fff;
+color:none;
+   
+}
+
+.view-kgbo-sidebar ul li{
+list-style-image: none !important;
+list-style-type: initial
+}
+.siderbartitle .region-notice-alert h2{background: #333;color: #ff0 !important;}
+.table-striped tr:nth-child(2n+1) {
+    background-color: #333;
+}
+.h1classeng{color:#ff0}
+.getbreadcrumbfont{color:#ff0}
+.h1classeng{color:#ff0}
+.table > thead > tr > th{color:#ff0}
+td strong{color:#ff0}
+.external-link ul li a {
+    font-size: 1em !important;
+    color: #ff0 !important;
+}
+.newsletter h1 {
+    background: #333;
+}
+.site-map-menus ul li{
+    list-style-image: none !important;
+    list-style: initial;
+    
+}
+#style1 a{color:#000}
+.news-slider{background:#000}
+.region-helpline h2, .region-latest-news h2, .region-notice-alert h2, .region-alert h2{
+    background: #464646;
+color: #ff0;
+}
+.bgorange .region-district-information ul li a, .bgorange .region-district-pofile ul li a, .bgorange .region-sectors-departments ul li a {
+    color: #ff0;
+}
+.bgorange .more-link a {
+    color: #ff0 !important;
+    border: 1px solid #ff0;
+    padding: 0 5px;
+}
+
+.item-list-slider a {
+    color: #ff0;
+}
+.col-sm-3 .region-district-pofile h2, .col-sm-3 .region-district-information h2, .news-box h2 {
+  color: #ff0;
+}
+.view-official-link ul li {
+    color: #ff0;
+}
+
+
+.item-list-slider a {
+    color: #ff0;
+}
+.region-notice-alert .more-link a {
+    color: #ff0 !important;
+    border: 1px solid #ff0;
+    padding: 0 5px;
+}
+.newsleft {
+    color: #ff0;
+    background: #595052;
+    border-right: 1px solid #595052;
+}
+.newsmarquee {
+    border-bottom: 1px solid #595052;
+    height: 31px;
+}
+.siderbartitle .region-notice-alert .content {    background: none;}
+    border-bottom: 1px solid #595052;
+.form-item-captcha-response  label{color:#000}
+.col-sm-3 .region-district-pofile h2, .col-sm-3 .region-district-information h2, {
+    margin-bottom: 0px !important;
+    text-align: center !important;
+    background: #595052 !important;
+color: #ff0;
+}
+.bgorange .content {
+    background: #121212;
+}
+.bgorange h2 {
+    margin-bottom: 0;
+    background: #595052;
+color:#ff0;
+}
+.item-list-slider {
+	background: none !important;
+    border-bottom: 1px #7d7676 dotted;
+    display: list-item;
+    margin-left: 1.3em;
+    list-style-type: initial;
+    background: none;
+    padding-left: 0;
+    list-style-image: none;
+}
+.tb-megamenu .nav > li {
+border-left: 1px solid #000;
+background-image: none;
+}
+.tb-megamenu .nav li.dropdown.open > .dropdown-toggle{ background-color: #000 !important; }
+.tb-megamenu-item a:hover {background: #000 !important;}
+.tb-megamenu .nav > li > a:focus, .tb-megamenu .nav > li > a:hover {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+.a:focus, a:hover {
+    color: #ff0 !important;
+    text-decoration: underline;
+}
+.view-district-department .item-list ul li, .view-main-department ul li{list-style: initial;}
+.field-name-body ul li{list-style: initial;}
+.page-update {
+ color: #fff;
+}
+.more-link a {
+    color: #ff0 !important;
+}
+.menu-bg {
+   background: #464646;
+    height: 44px;
+}
+a.style-switcher{color:#000}
+
+.homebg, .main {  background: #000; color:#ff0}
+.siderbartitle h2 {
+    background: #4c4c4c;
+    padding-top: 10px;
+}
+th {
+    background: #4c4c4c;
+  
+}
+.middlebox {
+    background: #000;
+    border-bottom: 1px solid #151515;
+    border-top: 1px solid #151515;
+}
+
+.region-notice-alert .content {
+    background: #595052;
+	    border: 0;
+	   
+}
+.field-name-body ul li {
+    width: 100%;
+   border-bottom: 1px #ccc dotted;
+    margin-top: 10px;
+    padding-bottom: 10px;
+list-style-position: inside;
+}
+.table .table {
+    background-color: #000;
+}
+.panel-default > .panel-heading {
+    color: #ff0;
+    background-color: #000;
+    border-color: #ddd;
+}
+.region-content .item-list ul li, .view-main-department ul li, .view-district-department ul li, .view-important-notice .view-content span {
+    width: 100%;
+    
+}
+.region-left-sub-menu ul.menu li {}
+
+p {
+
+    color: #ff0;
+}
+.view-official-link .item-list ul li, .region-district-pofile .item-list ul li, .region-district-information .item-list ul li, .region-sectors-departments .item-list ul li {
+    background: none;
+    list-style-position: inside !important;
+    list-style: inside !important;
+}
+a {
+    color: #ff0;
+    
+}
+.in{background: #464646;}
+#user-login input[type="text"] {color:#000}
+fieldset .fieldset-description {
+    margin-top: 48px !important;
+    color: #000;
+}
+input, textarea {
+    font-size: 0.875em !important;
+color:#000;
+}
+.view-footer a {
+    padding: 5px 20px;
+    color: #ff0;
+    border: 1px #ccc solid;
+    border-radius: 38px;
+}
+a:hover{color:#ff0 !important;}
+.footer-01{ background: #e67e32;}
+
+ul li span a{
+   color: #fff
+}
+
+h2.title a {
+    color: #ff0;
+}
+a:visited {
+    color: #fff;
+}
+.breadcrumb {
+    padding: 8px 0px;
+    margin-bottom: 20px;
+    list-style: none;
+    background-color: #000;
+    border-radius: 4px;
+}
+.site-map-box-menu ul li a {
+    color: #ff0 !important;
+}
+.table-hover > tbody > tr:hover {
+    background-color: #4c4c4c;
+}
+#breadcrumbs {
+    list-style: none;
+    background-color: #000000;
+    border-radius: 0;
+    height: 38px;
+    border-bottom: 1px solid;
+color:#ff0;
+}
+.region-latest-news span a {
+    color: #ff0;
+}
+ul.quicktabs-tabs.quicktabs-style-basic a {
+    text-decoration: none;
+    color: #ff0;
+    font-weight: normal;
+    font-family: 'Open Sans', sans-serif;
+}
+#cssmenu ul li a {
+    color: #ff0;
+}
+.tb-megamenu .nav-collapse .dropdown-menu {
+    
+   background-color: #464646;}
+.quicktabs_main.quicktabs-style-basic {
+    background-color: #000;}
+
+.lstnumrti li a {
+    color: #ff0;
+}
+a:visited {
+    color: #ff0;
+}
+ul.quicktabs-tabs.quicktabs-style-basic li.active {
+    border: 1px solid #aaa;
+    border-bottom: 1px solid #fff;
+    background-color: #000;
+}
+ul.quicktabs-tabs.quicktabs-style-basic li.active a {
+    color: #ff0;
+}
+.footer-01 {
+
+    margin-top: 0px;
+    background: #000;
+}
+.region-footer-first ul li a, .region-footer-second ul li a, .region-footer-third ul li a, .region-footer-fourth ul li a {
+    font-size: 1em !important;
+    color: #ff0 !important;
+}
+.region-footer-menu ul li a {
+    color: #ff0!important;
+}
+#views_slideshow_cycle_teaser_section_rightbar_latestnews-block{height: 185px; !important}
+.region-region-search input[type="text"] {color: #000;}
+
+.pager li > a, .pager li > span {
+    color: #000;
+}
+
+.region-content .item-list ul li {
+    color: #ff0;
+    list-style: initial;
+    list-style-image: none;
+   }
+span.glyphicon.glyphicon-map-marker, span.glyphicon.glyphicon-earphone, .glyphicon.glyphicon-envelope{background-color: #4c4c4c;color: #ff0;}
+.region-content .item-list ul li a:hover{color:#000}
+.region-skip-to-main a:hover, .top-right01 a:hover{color:red !important}
+
+/**** standard css *************/
+.region-skip-to-main a:hover,top-right01 a:hover{color:#000 !important}
+
+.region-district-information ul li a:hover, .region-district-pofile ul li a:hover, .region-sectors-departments ul li a:hover {
+    color: #FFF !important;
+}
+
+#style1 a:hover{
+    color: #000 !important;
+}
+
+.table-hover > tbody > tr:hover {
+    background-color: #000 !important;
+}
+
+ul li.last{
+    border-bottom: none !important;
+}
+
+#block-views-photo-gallery-block h2, #block-views-download-forms-block h2, .siderbartitle .region-district-information h2, .siderbartitle .region-district-pofile h2, .siderbartitle .region-notice-alert h2 {
+   
+}
+.view .view-footer{margin-top: 40px;}
+table.views-table tr.even {
+    background: #000 !important;
+    color: #3c3c3c;
+}
+
+.main a:focus, .main a:hover {
+    color: #ff0;
+    text-decoration: underline;
+}
+table.views-table tr td {
+    padding: 5px;
+    border: 1px solid #CCC;
+    border-collapse: collapse;
+    color: #ff0;
+    vertical-align: top;
+}
+.webform-component-textfield input[type="text"]{ color:#000000;}
+.webform-component-email input, textarea{ color:#000000;}
+input, select.form-select, textarea.form-textarea{ color:#000000;}
+fieldset .fieldset-description{ color:#000000;}
+.form-item-captcha-response label{ color:#000 !important;}
+
+.menu-bg {
+    background: #4c4c4c !important;
+}
+.siderbartitle .item-list-slider a {
+    color: #ff0;
+}
+.region-content footer ul li a {
+    padding: 3px 10px;
+    border: 1px solid #ff0;
+    color: #ff0;
+}
+.floatleft a {
+    color: #ff0;
+}
+.region-skip-to-main a:hover,top-right01 a:hover{color:#000 !important}
+.bgorange .region-district-pofile .item-list ul li, .bgorange .region-district-information .item-list ul li, .bgorange .region-sectors-departments .item-list ul li {
+border-bottom: 1px #333 dotted;
+}
+.siderbartitle .region-notice-alert .more-link a {
+    color: #ff0 !important;
+}
+
+p , ul li span a, #block-views-copyrights-block a {
+    color: #ff0 !important;
+}
+
+#block-views-copyrights-block a:hover {
+    color:#fff !important;
+}
+.newsleft {
+    background: #4c4c4c !important;
+    padding: 12px 0px;
+}
+.newsleft::after {
+    content: '';
+    position: absolute;
+    right: -9%;
+    top: 37%;
+  border-left: 10px solid #000;
+border-right: 10px solid #000;
+border-bottom: 14px solid #4c4c4c;
+    transform: rotate(90deg);
+    z-index: 100;
+}
+.views-slideshow-controls-bottom {
+    position: absolute;
+    z-index: 10000;
+    top: 0px;
+    background: #4c4c4c;
+	}
+.sb-icon-search {
+   background-color: #4c4c4c;
+}
+.node-readmore a{
+color: #ff0 !important;
+border: 1px solid #ff0;
+padding: 0 5px;
+}
+.newsletter {
+  
+}
+.sc-text a {
+    font-size: 1.25em;
+    font-weight: 400;
+    color: #ff0;
+    font-family: 'Varela Round', sans-serif;
+}
+.jcarousel-view--home-bottom-content--block li a h4 {
+    font-size: 1.2em !important;
+    color: #ff0 !important;
+    text-align: left;
+    margin-bottom: 10px;
+}
+.jcarousel-view--home-bottom-content--block li .field-content {
+    color: #ff0;
+}
+h1.side-title-head {
+    color: #ff0;
+}
+.footer-top {
+    background-color: #4c4c4c;
+}
+h4.footer-head { color: #ff0;}
+span.hq, address ul li{color:#ff0 !important}
+article .content p{color:#ff0}
+
+
+.top-02-left li, .top-01 li, .top-02-right li, .top-02-center li {
+
+   
+    color: #ff0 !important;
+    background: #4c4c4c !important;
+    border: 2px #4c4c4c solid !important;
+    box-shadow: 5px 0 10px #4c4c4c !important;
+
+}
+.modal-content{background-color: #4c4c4c;color: #ff0;}

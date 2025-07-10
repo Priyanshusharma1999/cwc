@@ -1,0 +1,167 @@
+<?php
+
+/**
+ * @file
+ * This module used for scrolling text from node title
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function scrolltext_help($section) {
+  switch ($section) {
+    case 'admin/help#scrolltext':
+    case 'admin/modules#description':
+      return "This module used for scrolling text from node title.";
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function scrolltext_permission() {
+  return array(
+    'access scrolltext' => array(
+      'title' => t('access scrolltext'),
+      'description' => t('TODO Add a description for \'access scrolltext\''),
+    ),
+    'administer scrolltext' => array(
+      'title' => t('administer scrolltext'),
+      'description' => t('TODO Add a description for \'administer scrolltext\''),
+    ),
+  );
+}
+
+/**
+ * Menu callback. Prints a listing of active nodes on the site.
+ */
+function scrolltext_menu() {
+  $items = array();
+
+  $items['admin/config/content/scrolltext'] = array(
+    'title' => 'ScrollText',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('scrolltext_settings_form'),
+    'access arguments' => array('administer scrolltext'),
+    'type' => MENU_NORMAL_ITEM,
+    'description' => 'ScrollText settings',
+    'file' => 'scrolltext.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function scrolltext_theme() {
+  return array(
+    'scrolltext_node' => array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function scrolltext_block_info() {
+  // TODO Rename block deltas (e.g. delta-0) to readable strings.
+  if (TRUE) {
+    $blocks['delta-0']['info'] = 'ScrollText';
+
+
+    return $blocks;
+  }
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function scrolltext_block_view($delta) {
+  // TODO Rename block deltas (e.g. delta-0) to readable strings.
+  $scrolltext_nodetype = variable_get('scrolltext_nodetype', 'content_type');
+  
+  if (TRUE) {
+    switch ($delta) {
+      case 'delta-0':
+        $block['subject'] = t('<none>');
+        $block['content'] = '';
+
+        $scrolltext_direction = variable_get('scrolltext_direction', 'Left');
+        $scrolltext_behavior = variable_get('scrolltext_behavior', 'Scroll');
+        $scrolltext_width    = variable_get('scrolltext_width', '100%');
+        $scrolltext_height   = variable_get('scrolltext_height', '0');
+        $scrolltext_speed    = variable_get('scrolltext_speed', '10');
+        $scrolltext_delay    = variable_get('scrolltext_delay', '100');
+
+        $scrolltext_source_type = variable_get('scrolltext_source_type', 'content_type');
+        $scrolltext_source_value = variable_get('scrolltext_source_value', 'article');
+        $scrolltext_count    = variable_get('scrolltext_count', '10');
+        
+        $scrolltext_content = '';
+        
+        if ($scrolltext_source_type == 'content_type') {
+          $sql = " SELECT n.title, n.nid FROM {node} n WHERE n.status = 1 and n.type = :scrolltext_source_value"
+               . " ORDER BY n.created DESC";
+          $results = db_query_range($sql, 0, $scrolltext_count, array(':scrolltext_source_value' => $scrolltext_source_value));
+          
+          foreach ($results as $row) {
+            $scrolltext_content .= "<span>" . l($row->title, 'node/' . $row->nid) . "</span>";
+            $scrolltext_content .= str_repeat('&nbsp', 5);
+            if ($scrolltext_direction == 'up' or $scrolltext_direction == 'down') {
+              $scrolltext_content .= "<br />\n";
+            }
+          }
+        }
+        else {
+          if (module_exists('views')) {
+            $view = views_get_view($scrolltext_source_value);
+            if ($view) {
+              //$view->execute();
+              // $scrolltext_content = $view->render();  
+              $scrolltext_content = $view->preview();
+            }
+            else {
+              $scrolltext_content = 'Views not found: ' . $scrolltext_source_value; 
+            }
+          }
+          else {
+            $scrolltext_content = t('Require Views module.');
+          }
+        }
+    
+        $block['content']  = "<div id='scrolltext'>"
+              . "<marquee direction='$scrolltext_direction' "
+              . "behavior='$scrolltext_behavior' "
+              . "width='$scrolltext_width' "
+              . "onmouseover='this.stop()' onmouseout='this.start()'";
+        if (strcmp($scrolltext_height, '0') !== 0) {
+          $block['content'] .= "height='$scrolltext_height' ";
+        }
+        $block['content'] .= "scrollamount='$scrolltext_speed' "
+              . "scrolldelay='$scrolltext_delay' "
+              . ">";
+        
+        $block['content'] .= $scrolltext_content;
+        $block['content'] .= '</marquee></div>';
+        
+        break;
+    }
+    return $block;
+  }
+}
+
+/**
+ * Implements hook_block().
+ *
+ */
+function scrolltext_block_OLD($op = 'list', $delta = 0) {
+  // TODO Remaining code in this function needs to be moved to the appropriate new hook function.
+  global $user;
+}
